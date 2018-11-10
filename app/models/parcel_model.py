@@ -1,6 +1,6 @@
 import json
 from flask import jsonify
-from users_model import users
+from app.models.users_model import users
 
 parcels = []
 instance_Items = []
@@ -8,41 +8,50 @@ status = ['delivered', 'pending', 'cancelled']
 
 
 class Items:
-    
+    instance_Items = []
     def __init__(self, item_name, item_weight, unit_delivery_price):
         self.item_name = item_name
         self.item_weight = item_weight
         self.unit_delivery_price = unit_delivery_price
-        self.amount = item_weight * unit_delivery_price
+        # self.instance_Items = []
+        # self.amount = self.item_weight * self.unit_delivery_price
     
     def create_item(self):
+        # self.instance_Items = []
         item = {
             "item_name": self.item_name, 
-            "weight": self.weight, 
+            "weight": self.item_weight, 
             "unit_delivery_price": self.unit_delivery_price, 
-            "amount": self.amount
+            # "amount": self.amount
         }
-        
-        instance_Items.append(item)
-        return item
+        # Items.instance_Items.append(item)
+        # instance_Items.append(item)
+        # return item
         # for item in items:
         #     if item['name'] == item_name:
         #         return jsonify({'message':'You have already added that item'})
-        #     else:
-                
+        # 
+           
+    # @staticmethod
+    # def get_total_weight(items_list):
+    #     for item in instance_Items:
+    #         total_Weight = item['weight']
+            # total_Weight += item['weight']
+            # total_Price = item['amount']
+            # total_Price += item['amount']
 
-    # def get_total_amount(self):
+        # return total_Weight
+# an_item = Items(item_name, item_weight, unit_delivery_price)
+# an_item.instance_Items
+# the_item = Items(**args)
+# the_item = an_item.create_item()
 
-        
+# for item in instance_Items:
+#     total_Weight = item['weight']
+#     total_Weight += item['weight']
+#     total_Price = item['amount']
+#     total_Price += item['amount']
 
-an_item = Items(item_name, item_weight, unit_delivery_price)
-the_item = an_item.create_item()
-
-for item in instance_Items:
-    total_Weight = item['weight']
-    total_Weight += item['weight']
-    total_Price = item['amount']
-    total_Price += item['amount']
 
 class Parcel():
     """Parcels class defining 
@@ -53,10 +62,10 @@ class Parcel():
         self.parcel_id = len(parcels) + 1
         self.pickup_location = pickup_location
         self.destination = destination
-        self.no_of_items = len(instance_Items)
+        self.no_of_items = len(Items.instance_Items)
         self.items = instance_Items
-        self.total_weight = total_Weight
-        self.total_price = total_Price
+        # self.total_weight = Items.get_total_weight(self.items)
+        # self.total_price = total_Price
         self.parcel_status = "pending"
 
         
@@ -69,15 +78,14 @@ class Parcel():
             "destination": self.destination,
             "no_of_items": self.no_of_items,
             "items": self.items,
-            "total_weight":self.total_weight,
-            "total_price": self.total_price,
+            # "total_weight":self.total_weight,
+            # "total_price": self.total_price,
             "status":self.parcel_status
         }
 
         for user in users:
-            # for parcelStatus in status:
-            # if user_id and parcelStatus:
-            if user_id:
+            # if user['user_id'] == user_id:
+            if user["user_id"]:
                 parcels.append(parcel)
                 return jsonify({"parcel successfully created":parcel})
             else:
@@ -88,8 +96,8 @@ class Parcel():
         """Method to get and 
         return all parcels
         """
-        # if len(parcels) > 0:
-        return jsonify({"parcels": parcels})
+        if len(parcels) > 0:
+            return jsonify({"parcels": parcels})
 
     @staticmethod
     def get_all_parcels_by_user(user_id):
@@ -97,11 +105,15 @@ class Parcel():
         return all parcels
         created by a specific user
         """
-        for user in users:
-            if user_id and len(parcels) > 0:
-                for parcel in parcels:
-                    if parcel['user_id'] == user_id:
-                        return jsonify({"parcels": parcel})
+        # for user in users:
+        #     if user_id and len(parcels) > 0:
+        my_parcels = []
+        for parcel in parcels:
+            if parcel['user_id'] == user_id:
+                my_parcels.append(parcel)
+        
+        if len(my_parcels) > 0:
+            return jsonify(my_parcels)
 
     @staticmethod
     def get_a_parcel(parcel_id):
@@ -114,37 +126,17 @@ class Parcel():
 
     
     def cancel_parcel_delivery_order(parcel_id, user_id):
-        # for user in users:
-        #     if user_id and len(parcels) > 0:
+        """Method to cancel a parcel 
+        delivery order and change 
+        status to cancelled
+        """
         for parcel in parcels:
             if parcel['parcel_id'] == parcel_id and parcel['user_id'] == user_id and parcel['status'] == 'pending':
-                parcel["status"] == "cancelled"
-                # parcel = {
-                #     "user_id": self.user_id,
-                #     "parcel_id" : self.parcel_id,
-                #     "pickup_location" : self.pickup_location,
-                #     "destination": self.destination,
-                #     "no_of_items": self.no_of_items,
-                #     "items": self.items,
-                #     "total_weight":self.total_weight,
-                #     "total_price": self.total_price,
-                #     "status":self.parcel_status
-                # }
-                parcels.append(parcel)
+                parcel["status"] = "cancelled"
                 return jsonify({"Parcel delivery order cancelled":parcel})
             else:
                 return({'message':'you dont have rights to modify that parcel'})
 
-            #     for parcelStatus in status:
-            #         if parcelStatus:
-            #             parcels.append(parcel)
-            #             return jsonify({"Parcel delivery order cancelled":parcel})
-            #         else:
-            #             return jsonify({'message':'Please enter a valid status, "cancelled".'})
-            # else:
-            #     return({'message':'you dont have rights to modify that parcel'})
-            # else:
-            #     return({'message':'there is no user with that ID and therefore no parcel created by them'})
 
    
 
