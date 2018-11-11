@@ -7,7 +7,6 @@ from app.models.item_model import Item
 from app.controllers.parcel_controller import Parcel_Controller
 
 
-
 @app.route('/')
 def index():
     """Index page"""
@@ -16,7 +15,7 @@ def index():
 
 @app.route("/api/v1/parcels", methods = ['GET'])
 def get_parcels():
-    """Retrieve all parcels"""
+    """Retrieve all parcel delivery orders"""
     return Parcel_Controller.get_parcels()
 
 
