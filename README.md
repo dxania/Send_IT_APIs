@@ -5,20 +5,22 @@ Set of API endpoints to be consumed by a courier service application
 [![Coverage Status](https://coveralls.io/repos/github/dxania/Store_Manager_APIs/badge.svg?branch=develop)](https://coveralls.io/github/dxania/Store_Manager_APIs?branch=develop)
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/dxania/Store_Manager_APIs) -->
 
+[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=feature)](https://travis-ci.org/dxania/Send_IT_APIs)
+
 
 ## Features
-The Program offers the following set of endpoints:
+The API offers the following set of endpoints:
 
 
-  | REQUEST           | ROUTE                      | FUNCTIONALITY                                      |
-  |-------------------|----------------------------|----------------------------------------------------|
-  |  GET              | /parcels                   | Fetch all parcel delivery orders                   |
-  |  GET              | /parcels/[parcelId]        | Fetch a specific parcel delivery order             |                     
-  |  GET              | /users/[userId]/parcels    | Fetch all parcel delivery orders by a specific user|                  
-  |  PUT              | /parcels/[parcelId]/cancel | Cancel a specific parcel delivery order            | 
-  |  POST             | /parcels                   | Create a parcel delivery order                     | 
-
-
+  | REQUEST      | ROUTE                               | FUNCTIONALITY                                                      |
+  |--------------|-------------------------------------|--------------------------------------------------------------------|
+  |  GET         | /parcels                            | Fetch all parcel delivery orders                                   |
+  |  GET         | /parcels/[parcelId]                 | Fetch a specific parcel delivery order                             | 
+  |  GET         | /users/[userId]/parcels             | Fetch all parcel delivery orders by a specific user                | 
+  |  PUT         | /parcels/[parcelId]/cancel          | Cancel a specific parcel delivery order                            | 
+  |  POST        | /parcels                            | Create a parcel delivery order                                     | 
+  |  PUT         | /users/[userId]/[parcelId]/cancel   | Cancel a specific parcel delivery order created by a specific user |
+  |  POST        | /users                              | Create a user                                                      |
 
 ## Getting started
 These instructions will get you a copy of the program on your local machine for development and testing purposes. The instructions are tailored for uses of `LINUX OS` particularly `UBUNTU`
@@ -79,7 +81,7 @@ You should see the name of the virtual environment placed right before your curr
 
 ## Deployment
 Deployed on heroku.
-Visit the this [link](https://send-it-apis.herokuapp.com) to interact with the deployed app
+Visit the this [link](https://send-it-api-app.herokuapp.com/) to interact with the deployed app
 
 ## Author
 [Daizy Obura](https://github.com/dxania/)
