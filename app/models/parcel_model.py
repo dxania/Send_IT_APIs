@@ -1,14 +1,11 @@
 import json
 from flask import jsonify
 from app.models.users_model import users
-# from app.exception_handler import InvalidUsage
 
 parcels = []
 
 class Parcel():
-    """Parcels class defining 
-    the parcel model
-    """
+    """Parcels class defining the parcel model"""
     def __init__(self, user_id, parcel_id, pickup_location, destination, items):
         self.user_id = user_id
         self.parcel_id = len(parcels) + 1
@@ -53,30 +50,3 @@ class Parcel():
         }
 
         return parcel
-
-    
-    def cancel_parcel(parcel_id):
-        """Method to cancel a parcel delivery order and change status to cancelled"""
-        for parcel in parcels:
-            if parcel['parcel_id'] == parcel_id: 
-                if parcel['status'] == 'pending':
-                    parcel["status"] = "cancelled"
-                    return jsonify({"Parcel_delivery_order_cancelled":parcel})
-                else:
-                    return jsonify({'message':'The parcel delivery order is not pending! It cannot be cancelled'}), 400
-            else:
-                return jsonify({'message':'There is no parcel with that ID'}), 400
-    
-    
-    def cancel_parcel_by_user(parcel_id, user_id):
-        """Method to cancel a parcel delivery order by a user and change status to cancelled"""
-        for parcel in parcels:
-            if parcel['parcel_id'] == parcel_id and parcel['user_id'] == user_id and parcel['status'] == 'pending':
-                parcel["status"] = "cancelled"
-                return jsonify({"Parcel_delivery_order_cancelled":parcel})
-            else:
-                return jsonify ({'message':'You dont have rights to modify that parcel'})
-
-
-   
-
