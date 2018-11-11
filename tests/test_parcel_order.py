@@ -3,12 +3,25 @@ import unittest
 from app import app
 from app.routes.parcel_routes import *
 
+test_user ={
+    "user_id": 1,
+    "user_name" : "dee",
+	"password": "winx"
+}
+
 test_parcel = {
-            "user_id":1,
-            "pickup_location" : "Kampala",
-            "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
-        }
+    "user_id":1,
+    "pickup_location" : "Kampala",
+    "destination": "Namugongo",
+    "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+}
+
+wrong_parcel = {
+    "user_id":2,
+    "pickup_location" : "Kampala",
+    "destination": "Namugongo",
+    "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+}
 
 class Base(unittest.TestCase):
     """Base class for tests. 
@@ -29,11 +42,11 @@ class Endpoints(Base):
     getting all parcel delivery orders by a specific user.  
     """
     def test_get_all_parcel_delivery_orders(self):
-        post_request = self.app_client.post("/api/v1/parcels",
-                                 content_type='application/json',
-                                 data=json.dumps(test_parcel)
-                    )
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))    
+        post_request = self.app_client.post("/api/v1/parcels",content_type='application/json',data=json.dumps(test_parcel))      
         get_request = self.app_client.get("/api/v1/parcels")
+        self.assertEqual(create_user.status_code, 201)
+        self.assertEqual(post_request.status_code, 201)
         self.assertEqual(get_request.status_code, 200)
 
     def test_empty_parcel_delivery_order_list(self):
@@ -42,20 +55,23 @@ class Endpoints(Base):
         self.assertEqual(response['message'], 'There are no parcel delivery orders')
         self.assertEqual(get_request.status_code, 200)
 
-    # def test_get_all_parcel_delivery_orders_specific_user(self):
-    #     parcel = {
-    #         "user_id":1,
-    #         "parcel_id" : 9,
-    #         "pickup_location" : "Kampala",
-    #         "destination": "Namugongo",
-    #         "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
-    #     }
-    #     post_request = self.app_client.post("/api/v1/parcels",
-    #                              content_type='application/json',
-    #                              data=json.dumps(parcel)
-    #                 )
-    #     get_request = self.app_client.get("/api/v1/users/1/parcels")
-    #     self.assertEqual(get_request.status_code, 200)
+    def test_get_all_parcel_delivery_orders_by_specific_user(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        post_request = self.app_client.post("/api/v1/parcels",content_type='application/json',data=json.dumps(test_parcel))
+        get_request = self.app_client.get("/api/v1/users/1/parcels")
+        # self.assertEqual(create_user.status_code, 201)
+        self.assertEqual(post_request.status_code, 201)
+        self.assertEqual(get_request.status_code, 200)
+
+    def test_get_all_parcel_delivery_orders_by_non_user(self):
+        post_request = self.app_client.post("/api/v1/parcels",
+                                 content_type='application/json',
+                                 data=json.dumps(test_parcel)
+                    )
+        get_request = self.app_client.get("/api/v1/users/2/parcels")
+        response = json.loads(get_request.data.decode())
+        self.assertEqual(response['message'], 'There are no parcels delivery orders created by that user or the user does not exist')
+        self.assertEqual(get_request.status_code, 200)
 
     # def test_cancel_parcel_delivery_order(self):
     #     parcel = {

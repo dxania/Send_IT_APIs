@@ -14,7 +14,6 @@ class Parcel_Controller:
         Navigate to this link to interact with the parcels endpoint</a><br><br>
         """
 
-
     def get_parcels():
         """Retrieve all parcels"""
         parcels_list = []
@@ -26,16 +25,15 @@ class Parcel_Controller:
             return jsonify({"message": "There are no parcel delivery orders"}), 200
 
 
-    # @app.route("/api/v1/users/<int:user_id>/parcels", methods = ['GET'])
-    # def get_parcels_by_user(user_id):
-    #     """Retrieve all parcels by a specific user"""
-    #     my_parcels = []
-    #     for parcel in parcels:
-    #         parcel_dict = parcel.to_dict()
-    #         if parcel_dict['user_id'] == user_id:
-    #             my_parcels.append(parcel_dict)
-    #             return jsonify({'my_pacels':my_parcels}), 200
-    #     return jsonify({'message':'There are no parcels delivery orders created by that user or the user does not exist'}), 200
+    def get_parcels_by_user(user_id):
+        """Retrieve all parcels by a specific user"""
+        my_parcels = []
+        for parcel in parcels:
+            parcel_dict = parcel.to_dict()
+            if parcel_dict['user_id'] == user_id:
+                my_parcels.append(parcel_dict)
+                return jsonify({'my_pacels':my_parcels}), 200
+        return jsonify({'message':'There are no parcels delivery orders created by that user or the user does not exist'}), 200
 
 
     # @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
