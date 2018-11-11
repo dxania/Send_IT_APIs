@@ -15,7 +15,7 @@ def index():
 
 @app.route("/api/v1/parcels", methods = ['GET'])
 def get_parcels():
-    """Retrieve all parcel delivery orders"""
+    """Retrieve all parcels"""
     return Parcel_Controller.get_parcels()
 
 
