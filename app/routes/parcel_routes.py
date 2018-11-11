@@ -1,157 +1,151 @@
 import re
-
 from flask import jsonify, flash, request, make_response
-
-from app.exception_handler import InvalidUsage
 from app import app
-from app.models.parcel_model import Parcel, parcels, Items
-from app.models.users_model import users
+from app.models.parcel_model import Parcel, parcels
+from app.models.users_model import *
+from app.models.item_model import Item
+from app.controllers.parcel_controller import Parcel_Controller
 
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    """Error handling and exception raising"""
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+
 
 @app.route('/')
 def index():
-    """The first page and endpoint that 
-    is rendered on loading the url
-    """
-    return """parcels ==>
-    <a href="">
-    Navigate to this link to interact with the parcels endpoint</a><br><br>
-    """
+    """Index page"""
+    return Parcel_Controller.index()
 
 
 @app.route("/api/v1/parcels", methods = ['GET'])
 def get_parcels():
-    """Retrieve all parcels function 
-    wrapped around the Get /parcels endpoint
-    """
-    all_parcels = Parcel.get_all_parcels()
-    if all_parcels:
-        return all_parcels, 200
-    else:
-        raise InvalidUsage('There are no parcels in the store', status_code=204) 
+    """Retrieve all parcels"""
+    return Parcel_Controller.get_parcels()
+
 
 @app.route("/api/v1/users/<int:user_id>/parcels", methods = ['GET'])
 def get_parcels_by_user(user_id):
-    """Retrieve all parcels by a specific 
-    user function wrapped around the 
-    Get /parcels endpoint
-    """
-    all_parcels_by_user = Parcel.get_all_parcels_by_user(user_id)
-    if all_parcels_by_user:
-        return all_parcels_by_user, 200
-    else:
-        raise InvalidUsage('There are no parcels delivery orders created by that user', status_code=404)
+    """Retrieve all parcels by a specific user"""
+    my_parcels = []
+    for parcel in parcels:
+        parcel_dict = parcel.to_dict()
+        if parcel_dict['user_id'] == user_id:
+            my_parcels.append(parcel_dict)
+            return jsonify({'my_pacels':my_parcels}), 200
+    return jsonify({'message':'There are no parcels delivery orders created by that user or the user does not exist'}), 200
 
 
 @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
 def get_parcel(parcel_id):
-    """Retrieve a particular parcel 
-    function wrapped around the Get 
-    /parcel/<int:parcel_id> endpoint
-    """
-    a_single_parcel = Parcel.get_a_parcel(parcel_id)
-    if a_single_parcel:
-        return a_single_parcel, 200
-    else:
-        raise InvalidUsage('There is no parcel matching that ID', status_code=204)
+    """Retrieve a particular parcel"""
+
+    for parcel in parcels:
+        parcel_dict = parcel.to_dict()
+        if parcel_dict['parcel_id'] == parcel_id:
+            return jsonify({"parcel":parcel_dict}), 200
+    return jsonify({'message':f"Parcel with ID {parcel_id} does not exist"}), 200
+
+
+@app.route('/api/v1/parcels/<int:parcel_id>/cancel', methods = ['PUT'])
+def cancel_parcel(parcel_id):
+    """Cancel a particular parcel delivery order"""
+    for parcel in parcels:
+        parcel_dict = parcel.to_dict()
+        if parcel_dict['parcel_id'] == parcel_id: 
+            if parcel_dict['status'] == 'pending':
+                parcel_dict["status"] = "cancelled"
+                return jsonify({"Parcel_delivery_order_cancelled":parcel_dict}), 200
+            else:
+                return jsonify({'message':'The parcel delivery order is not pending! It cannot be cancelled'}), 200
+    return jsonify({'message':'There is no parcel with that ID'}), 200
+
+
 
 @app.route('/api/v1/users/<int:user_id>/<int:parcel_id>/cancel', methods = ['PUT'])
-def cancel_parcel(parcel_id, user_id):
-    """Cancel a particular parcel delivery order
-    function wrapped around the Put
-    /parcels/<int:user_id>/<int:parcel_id> endpoint
-    """
-    # for user in users:
-    #     if not user_id:
-    #         raise InvalidUsage('You dont have rights to cancel this parcel delivery order', status_code=400)
-    #     else:
-    a_single_parcel_to_cancel = Parcel.cancel_parcel_delivery_order(parcel_id, user_id)
-    if a_single_parcel_to_cancel:
-        return a_single_parcel_to_cancel, 202
-    else:
-        raise InvalidUsage('You dont have rights to cancel this parcel delivery order', status_code=400)
-
+def cancel_parcel_by_user(parcel_id, user_id):
+    """Cancel a particular parcel delivery order by a user"""
+    for parcel in parcels:
+        parcel_dict = parcel.to_dict()
+        if parcel_dict['parcel_id']:
+            if parcel_dict['parcel_id'] == parcel_id and parcel_dict['user_id'] == user_id: 
+                if parcel_dict['status'] == 'pending':
+                    parcel_dict["status"] = "cancelled"
+                    return jsonify({"Parcel_delivery_order_cancelled":parcel_dict}), 200
+                else:
+                    return jsonify({'message':'The parcel delivery order is not pending! It cannot be cancelled'}), 200
+            else:
+                return jsonify({'message':'You dont have rights to cancel this parcel delivery order'}), 200
+    return jsonify({'message':'There is no parcel with that ID'}), 200
 
    
 @app.route('/api/v1/parcels', methods =['POST'])
 def create_parcel():
-    """Create a parcel function 
-    wrapped around the Post /parcels 
-    endpoint
-    """
-
-    #store the request data in user_input variable
+    """Create a parcel function wrapped around the Post /parcels endpoint"""
     user_input = request.get_json(force=True)
 
-    #validate user input
-   
-    # total_price = 
-    items = user_input.get("items")
-    if not items or len(items) == 0:
-        raise InvalidUsage('Enter at least one item', status_code=400)
-    if not isinstance(items, list):
-        raise InvalidUsage('Items must be a list of dictionaries', status_code=400)
-    
-
-    # total_weight = Items.get_total_weight(items)
-    # no_of_items = len(items)
-
+ 
     user_id = user_input.get("user_id")
-    # for user in users:
-    #     if user_id:
-    #         raise InvalidUsage('That user id does not exist, you cannot create a parcel', status_code=400)
+    if not isinstance(user_id, int):
+        return jsonify({'message':'Enter a valid user ID'}), 400
+    if not user_id:
+        return jsonify({'message':'User ID is required'}), 400
 
     destination = user_input.get("destination")
     if not destination or destination.isspace():
-        raise InvalidUsage('Destination is required', status_code=400)
+        return jsonify({'message':'Destination is required'}), 400
     charset = re.compile('[A-Za-z]')
     checkmatch = charset.match(destination)
     if not checkmatch:
-        raise InvalidUsage('Destination must be letters', status_code=400)
+        return jsonify({'message':'Destination must be letters'}), 400
 
     pickup_location = user_input.get("pickup_location")
     if not pickup_location or pickup_location.isspace():
-        raise InvalidUsage('Pickup location is required', status_code=400)
+        return jsonify({'message':'Pickup location is required'}), 400
     charset = re.compile('[A-Za-z]')
     checkmatch = charset.match(pickup_location)
     if not checkmatch:
-        raise InvalidUsage('Pickup location must be letters', status_code=400)
+        return jsonify({'message':'Pickup location must be letters'}), 400
 
+    result_items = user_input.get("items")
+    if not result_items:
+        return jsonify({'message':'Enter at least one item'}), 400
+    if not isinstance(result_items, list):
+        return jsonify({'message':'Items must be a list of dictionaries'}), 400
+    
     parcel_id = len(parcels) + 1
 
-    item_name = user_input.get("item_name")
-    # if not item_name or item_name.isspace():
-    #     raise InvalidUsage('Parcel item name is required', status_code=400)
-    # charset = re.compile('[A-Za-z]')
-    # checkmatch = charset.match(item_name)
-    # if not checkmatch:
-    #     raise InvalidUsage('Parcel item name must be letters', status_code=400)
+    
+    items = []
+    for result_item in result_items:
+        item_name = result_item["item_name"] 
+        if not item_name or item_name.isspace():
+            return jsonify({'message':'Parcel item name is required'}), 400
+        charset = re.compile('[A-Za-z]')
+        checkmatch = charset.match(item_name)
+        if not checkmatch:
+            return jsonify({'message':'Parcel item name must be letters'}), 400
 
-    item_weight = user_input.get("item_weight")
-    # if not item_weight:
-    #     raise InvalidUsage('Parcel item weight is required', status_code=400)
-    # if not isinstance(item_weight,int):
-    #     raise InvalidUsage('Parcel item weight must be an integer', status_code=400)
-    
-    unit_delivery_price = user_input.get("unit_delivery_price")
-    # if not item_weight:
-    #     raise InvalidUsage('Parcel item unit delivery price is required', status_code=400)
-    # if not isinstance(item_weight,int):
-    #     raise InvalidUsage('Parcel item unit delivery price must be an integer', status_code=400)
+        item_weight = result_item['item_weight'] 
+        if not item_weight:
+            return jsonify({'message':'Parcel item weight is required'}), 400
+        if not isinstance(item_weight,int):
+            return jsonify({'message':'Parcel item weight must be an integer'}), 400
     
     
-    an_item = Items(item_name, item_weight, unit_delivery_price)
-    the_item = an_item.create_item()
-        
-    parcel_object = Parcel(user_id, parcel_id, pickup_location, destination, items)
-    parcel = parcel_object.create_a_parcel()
-    if parcels:
-        return parcel, 201
-    else:
-        raise InvalidUsage('Insertion failed', status_code=400)
+        unit_delivery_price = result_item['unit_delivery_price']
+        if not unit_delivery_price:
+            return jsonify({'message':'Parcel item unit delivery price is required'}), 400
+        if not isinstance(unit_delivery_price,int):
+            return jsonify({'message':'Parcel item unit delivery price must be an integer'}), 400
+            
+        item = Item(item_name, item_weight, unit_delivery_price)
+        items.append(item)
+
+    parcel = Parcel(user_id, parcel_id, pickup_location, destination, items)
+
+    # try:
+    for user in users:
+        user_dict = user.to_dict()
+        if user_dict['user_id'] == user_id:
+            parcels.append(parcel)
+            return jsonify({"parcel_successfully_created":parcel.to_dict()}), 201
+    # except Exception as e:
+    #     print(e.message)
+    return jsonify({'message':'You dont have rights to create a parcel delivery order'}), 200
