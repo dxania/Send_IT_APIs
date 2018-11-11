@@ -5,6 +5,8 @@ Set of API endpoints to be consumed by a courier service application
 [![Coverage Status](https://coveralls.io/repos/github/dxania/Store_Manager_APIs/badge.svg?branch=develop)](https://coveralls.io/github/dxania/Store_Manager_APIs?branch=develop)
 [![Code Climate](https://codeclimate.com/github/codeclimate/codeclimate/badges/gpa.svg)](https://codeclimate.com/github/dxania/Store_Manager_APIs) -->
 
+[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=feature)](https://travis-ci.org/dxania/Send_IT_APIs)
+
 
 ## Features
 The Program offers the following set of endpoints:

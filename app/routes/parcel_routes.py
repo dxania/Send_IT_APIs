@@ -12,7 +12,6 @@ def index():
     """Index page"""
     return Parcel_Controller.index()
 
-
 @app.route("/api/v1/parcels", methods = ['GET'])
 def get_parcels():
     """Retrieve all parcels"""
@@ -28,12 +27,7 @@ def get_parcels_by_user(user_id):
 @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
 def get_parcel(parcel_id):
     """Retrieve a particular parcel"""
-
-    for parcel in parcels:
-        parcel_dict = parcel.to_dict()
-        if parcel_dict['parcel_id'] == parcel_id:
-            return jsonify({"parcel":parcel_dict}), 200
-    return jsonify({'message':f"Parcel with ID {parcel_id} does not exist"}), 200
+    return Parcel_Controller.get_parcel(parcel_id)
 
 
 @app.route('/api/v1/parcels/<int:parcel_id>/cancel', methods = ['PUT'])

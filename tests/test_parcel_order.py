@@ -73,6 +73,17 @@ class Endpoints(Base):
         self.assertEqual(response['message'], 'There are no parcels delivery orders created by that user or the user does not exist')
         self.assertEqual(get_request.status_code, 200)
 
+    def test_get_parcel(self):
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel))
+        self.assertEqual(post_request.status_code, 201)
+        get_request = self.app_client.get("/api/v1/parcels/1")
+        self.assertEqual(get_request.status_code, 200)
+
+    def test_get_non_existent_parcel(self):
+        get_request = self.app_client.get("/api/v1/parcels/4")
+        response = json.loads(get_request.data.decode())
+        self.assertEqual(response['message'], "Parcel with ID 4 does not exist")
+
     # def test_cancel_parcel_delivery_order(self):
     #     parcel = {
     #         "user_id":1,
@@ -91,24 +102,7 @@ class Endpoints(Base):
         # self.assertEqual(put_request.status_code, 202)
 
 
-#     def test_get_parcel(self):
-#         parcel = {
-#             "user_id":1,
-#             "parcel_id" : 9,
-#             "pickup_location" : "Kampala",
-#             "destination": "Namugongo",
-#             # "no_of_items": 2,
-#             "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
-#             # "total_weight":41,
-#             # "total_price": 65000
-#         }
-#         post_request = self.app_client.post("/api/v1/parcels",
-#                                  content_type='application/json',
-#                                  data=json.dumps(parcel)
-#                     )
-#         self.assertEqual(post_request.status_code, 201)
-#         get_request = self.app_client.get("/api/v1/parcels/1")
-#         self.assertEqual(get_request.status_code, 200)
+#     
     
 #     def test_create_parcel(self):
 #         parcel = {

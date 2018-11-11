@@ -36,15 +36,14 @@ class Parcel_Controller:
         return jsonify({'message':'There are no parcels delivery orders created by that user or the user does not exist'}), 200
 
 
-    # @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
-    # def get_parcel(parcel_id):
-    #     """Retrieve a particular parcel"""
+    def get_parcel(parcel_id):
+        """Retrieve a particular parcel"""
 
-    #     for parcel in parcels:
-    #         parcel_dict = parcel.to_dict()
-    #         if parcel_dict['parcel_id'] == parcel_id:
-    #             return jsonify({"parcel":parcel_dict}), 200
-    #     return jsonify({'message':f"Parcel with ID {parcel_id} does not exist"}), 200
+        for parcel in parcels:
+            parcel_dict = parcel.to_dict()
+            if parcel_dict['parcel_id'] == parcel_id:
+                return jsonify({"parcel":parcel_dict}), 200
+        return jsonify({'message':f"Parcel with ID {parcel_id} does not exist"}), 200
 
 
     # @app.route('/api/v1/parcels/<int:parcel_id>/cancel', methods = ['PUT'])
