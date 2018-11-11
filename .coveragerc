@@ -11,6 +11,7 @@ omit =
     */venv/*
     */__pycache/*
     */.pytest_cache/*
+    app/models/*
 
 exclude_lines =
     pragma: no cover

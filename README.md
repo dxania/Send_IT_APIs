@@ -19,7 +19,7 @@ The API offers the following set of endpoints:
   |  GET         | /users/[userId]/parcels             | Fetch all parcel delivery orders by a specific user                | 
   |  PUT         | /parcels/[parcelId]/cancel          | Cancel a specific parcel delivery order                            | 
   |  POST        | /parcels                            | Create a parcel delivery order                                     | 
-  |  PUT         | /users/<userId>/<parcelId>/cancel   | Cancel a specific parcel delivery order created by a specific user |
+  |  PUT         | /users/[userId]/[parcelId]/cancel   | Cancel a specific parcel delivery order created by a specific user |
   |  POST        | /users                              | Create a user                                                      |
 
 ## Getting started
