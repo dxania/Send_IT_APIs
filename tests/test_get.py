@@ -11,9 +11,11 @@ test_user ={
 
 test_parcel = {
     "user_id":1,
+    "recipient_name": "Corn",
+    "recipient_mobile": 1234567890,
     "pickup_location" : "Kampala",
     "destination": "Namugongo",
-    "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+    "items": [{"item_name": "Shoes", "item_weight": 40}]
 }
 
 
@@ -65,9 +67,9 @@ class Endpoints(Base):
         self.assertEqual(get_request.status_code, 200)
 
     def test_get_non_existent_parcel(self):
-        get_request = self.app_client.get("/api/v1/parcels/4")
+        get_request = self.app_client.get("/api/v1/parcels/400")
         response = json.loads(get_request.data.decode())
-        # self.assertEqual(response['message'], "Parcel with ID 4 does not exist")
+        self.assertEqual(response['message'], "Parcel with ID 400 does not exist")
         self.assertEqual(get_request.status_code, 200)
 
 if __name__ == ('__main__'):
