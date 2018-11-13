@@ -77,7 +77,6 @@ class Parcel_Controller:
 
     def create_parcel():
         """Create a parcel function wrapped around the Post /parcels endpoint"""
-        parcel_id = len(parcels) + 1
 
         user_input = request.get_json(force=True)
 
@@ -94,6 +93,22 @@ class Parcel_Controller:
         checkmatch = charset.match(destination)
         if not checkmatch:
             return jsonify({'message':'Destination must be letters'}), 400
+
+        recipient_name = user_input.get("recipient_name")
+        if not recipient_name or recipient_name.isspace():
+            return jsonify({'message':'Recipient name is required'}), 400
+        charset = re.compile('[A-Za-z]')
+        checkmatch = charset.match(recipient_name)
+        if not checkmatch:
+            return jsonify({'message':'Recipient name must be letters'}), 400
+
+        recipient_mobile = user_input.get("recipient_mobile")
+        if not recipient_mobile:
+            return jsonify({'message':'Recipient mobile contact is required'}), 400
+        if not isinstance(recipient_mobile,int):
+            return jsonify({'message':'Recipient mobile contact must be numbers'}), 400
+        if len(str(recipient_mobile)) != 10:
+            return jsonify({'message':'Please enter a valid mobile contact'})
 
         pickup_location = user_input.get("pickup_location")
         if not pickup_location or pickup_location.isspace():
@@ -125,17 +140,11 @@ class Parcel_Controller:
                 return jsonify({'message':'Parcel item weight is required'}), 400
             if not isinstance(item_weight,int):
                 return jsonify({'message':'Parcel item weight must be an integer'}), 400
-        
-            unit_delivery_price = result_item['unit_delivery_price']
-            if not unit_delivery_price:
-                return jsonify({'message':'Parcel item unit delivery price is required'}), 400
-            if not isinstance(unit_delivery_price,int):
-                return jsonify({'message':'Parcel item unit delivery price must be an integer'}), 400
                 
-            item = Item(item_name, item_weight, unit_delivery_price)
+            item = Item(item_name, item_weight)
             items.append(item)
 
-        parcel = Parcel(user_id, parcel_id, pickup_location, destination, items)
+        parcel = Parcel(user_id, pickup_location, destination, items, recipient_name, recipient_mobile)
 
         for user in users:
             user_dict = user.to_dict()

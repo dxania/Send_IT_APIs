@@ -11,17 +11,17 @@ test_user ={
 
 test_parcel = {
     "user_id":1,
+    "recipient_name": "Corn",
+    "recipient_mobile": 1234567890,
     "pickup_location" : "Kampala",
     "destination": "Namugongo",
-    "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+    "items": [{"item_name": "Shoes", "item_weight": 40}]
 }
 
 
 class Base(unittest.TestCase):
     """Base class for tests. 
-    This class defines a common `setUp` 
-    method that defines attributes which 
-    are used in the various tests.
+    This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
 
     def setUp(self):
@@ -31,8 +31,7 @@ class Base(unittest.TestCase):
 class Endpoints(Base):
     """
     Tests all aspects of endpoints
-    Tests include: creating a parcel delivery order, getting all parcel delivery orders,
-    getting a particular parcel delivery order, canceling a parcel delivery order,
+    Tests include: getting all parcel delivery orders, getting a particular parcel delivery order,
     getting all parcel delivery orders by a specific user.  
     """
     def test_get_empty_parcel_delivery_order_list(self):
@@ -65,9 +64,9 @@ class Endpoints(Base):
         self.assertEqual(get_request.status_code, 200)
 
     def test_get_non_existent_parcel(self):
-        get_request = self.app_client.get("/api/v1/parcels/4")
+        get_request = self.app_client.get("/api/v1/parcels/400")
         response = json.loads(get_request.data.decode())
-        # self.assertEqual(response['message'], "Parcel with ID 4 does not exist")
+        self.assertEqual(response['message'], "Parcel with ID 400 does not exist")
         self.assertEqual(get_request.status_code, 200)
 
 if __name__ == ('__main__'):
