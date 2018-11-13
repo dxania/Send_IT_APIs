@@ -21,9 +21,7 @@ test_parcel = {
 
 class Base(unittest.TestCase):
     """Base class for tests. 
-    This class defines a common `setUp` 
-    method that defines attributes which 
-    are used in the various tests.
+    This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
 
     def setUp(self):
@@ -33,8 +31,7 @@ class Base(unittest.TestCase):
 class Endpoints(Base):
     """
     Tests all aspects of endpoints
-    Tests include: creating a parcel delivery order, getting all parcel delivery orders,
-    getting a particular parcel delivery order, canceling a parcel delivery order,
+    Tests include: getting all parcel delivery orders, getting a particular parcel delivery order,
     getting all parcel delivery orders by a specific user.  
     """
     def test_get_empty_parcel_delivery_order_list(self):
