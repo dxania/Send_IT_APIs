@@ -11,9 +11,11 @@ test_user ={
 
 test_parcel = {
     "user_id":1,
+    "recipient_name": "Corn",
+    "recipient_mobile": 1234567890,
     "pickup_location" : "Kampala",
     "destination": "Namugongo",
-    "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+    "items": [{"item_name": "Shoes", "item_weight": 40}]
 }
 
 class Base(unittest.TestCase):
@@ -37,9 +39,11 @@ class Endpoints(Base):
     def test_non_user_create_parcel(self):
         parcel = {
             "user_id":100,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         self.assertEqual(response.status_code, 200)
@@ -69,9 +73,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id": "p",
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Najja",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
@@ -81,22 +87,103 @@ class Set(Base):
     def test_userid_required(self):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Najja",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
         self.assertIn("User ID is required", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
+    def test_recipient_name_letters(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        parcel = {
+                "user_id" : 1,
+                "recipient_name": "90",
+                "recipient_mobile": 1234567890,
+                "pickup_location" : "Kampala",
+                "destination": "Namugongo",
+                "items": [{"item_name": "Shoes", "item_weight": 40, }]
+        }
+        post_request = self.app_client.post("/api/v1/parcels",
+                                        content_type='application/json',
+                                        data=json.dumps(parcel))
+        response = json.loads(post_request.data.decode())
+        self.assertIn("Recipient name must be letters", response['message'])
+        self.assertEqual(post_request.status_code, 400)
+
+    def test_recipient_name_required(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        parcel = {
+            "user_id" : 1,
+            "recipient_name": "",
+            "recipient_mobile": 1234567890,
+            "pickup_location" : "Kampala",
+            "destination": "Namugongo",
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
+        }
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
+        response = json.loads(post_request.data.decode())
+        self.assertIn("Recipient name is required", response['message'])
+        self.assertEqual(post_request.status_code, 400)
+
+    def test_recipient_mobile_required(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        parcel = {
+            "user_id" : 9,
+            "recipient_name": "Corn",
+            "recipient_mobile": "",
+            "pickup_location" : "Kampala",
+            "destination": "Namugongo",
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
+        }
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
+        response = json.loads(post_request.data.decode())
+        self.assertIn("Recipient mobile contact is required", response['message'])
+        self.assertEqual(post_request.status_code, 400)
+
+    def test_recipient_mobile_number(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        parcel = {
+            "user_id" : 1,
+            "recipient_name": "Corn",
+            "recipient_mobile": "y",
+            "pickup_location" : "Kampala",
+            "destination": "Namugongo",
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
+        }
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
+        response = json.loads(post_request.data.decode())
+        self.assertIn("Recipient mobile contact must be numbers", response['message'])
+        self.assertEqual(post_request.status_code, 400)
+
+    def test_recipient_mobile_valid(self):
+        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
+        parcel = {
+            "user_id" : 1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 100,
+            "pickup_location" : "Kampala",
+            "destination": "Namugongo",
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
+        }
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
+        response = json.loads(post_request.data.decode())
+        self.assertIn("Please enter a valid mobile contact", response['message'])
+        # self.assertEqual(post_request.status_code, 400)
+
     def test_pickup_location_required(self):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
@@ -108,9 +195,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
@@ -121,9 +210,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "90",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels",
                                         content_type='application/json',
@@ -136,9 +227,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "89",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
@@ -150,6 +243,8 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "Namugongo",
             "items": ""
@@ -163,6 +258,8 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id":1,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "Namugongo",
             "items": "cook"
@@ -176,9 +273,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
                 "user_id":1,
+                "recipient_name": "Corn",
+                "recipient_mobile": 1234567890,
                 "pickup_location" : "Kampala",
                 "destination": "Namugongo",
-                "items": [{"item_name": "", "item_weight": 40, "unit_delivery_price":2000}]
+                "items": [{"item_name": "", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels",
                                         content_type='application/json',
@@ -191,9 +290,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
                 "user_id" : 1,
+                "recipient_name": "Corn",
+                "recipient_mobile": 1000000000,
                 "pickup_location" : "Kampala",
                 "destination": "Namugongo",
-                "items": [{"item_name": "22", "item_weight": 40, "unit_delivery_price":2000}]
+                "items": [{"item_name": "22", "item_weight": 40}]
         }
         post_request = self.app_client.post("/api/v1/parcels",content_type='application/json',data=json.dumps(parcel))
         response = json.loads(post_request.data.decode())
@@ -204,9 +305,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
                 "user_id" : 9,
+                "recipient_name": "Corn",
+                "recipient_mobile": 1000000000,
                 "pickup_location" : "Kampala",
                 "destination": "Namugongo",
-                "items": [{"item_name": "Shoes", "item_weight": "", "unit_delivery_price":2000}]
+                "items": [{"item_name": "Shoes", "item_weight": ""}]
         }
         post_request = self.app_client.post("/api/v1/parcels",
                                         content_type='application/json',
@@ -219,9 +322,11 @@ class Set(Base):
         create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
         parcel = {
             "user_id" : 9,
+            "recipient_name": "Corn",
+            "recipient_mobile": 1234567890,
             "pickup_location" : "Kampala",
             "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": "x", "unit_delivery_price":2000}]
+            "items": [{"item_name": "Shoes", "item_weight": "x"}]
         }
         post_request = self.app_client.post("/api/v1/parcels",
                                         content_type='application/json',
@@ -230,58 +335,9 @@ class Set(Base):
         self.assertIn("Parcel item weight must be an integer", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
-    def test_item_unit_delivery_price_required(self):
-        parcel = {
-                "user_id" : 9,
-                "pickup_location" : "Kampala",
-                "destination": "Namugongo",
-                "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":""}]
-        }
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
-        response = json.loads(post_request.data.decode())
-        self.assertIn("Parcel item unit delivery price is required", response['message'])
-        self.assertEqual(post_request.status_code, 400)
+    
 
-    def test_item_unit_delivery_price_number(self):
-        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
-        parcel = {
-            "user_id" : 1,
-            "pickup_location" : "Kampala",
-            "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":"x"}]
-        }
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
-        response = json.loads(post_request.data.decode())
-        self.assertIn("Parcel item unit delivery price must be an integer", response['message'])
-        self.assertEqual(post_request.status_code, 400)
-
-    def test_item_total_delivery_price_required(self):
-        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
-        parcel = {
-                "user_id" : 1,
-                "pickup_location" : "Kampala",
-                "destination": "Namugongo",
-                "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":""}]
-        }
-        post_request = self.app_client.post("/api/v1/parcels",
-                                        content_type='application/json',
-                                        data=json.dumps(parcel))
-        response = json.loads(post_request.data.decode())
-        self.assertIn("Parcel item unit delivery price is required", response['message'])
-        self.assertEqual(post_request.status_code, 400)
-
-    def test_item_total_delivery_price_number(self):
-        create_user = self.app_client.post("/api/v1/users", content_type='application/json', data=json.dumps(test_user))
-        parcel = {
-            "user_id" : 9,
-            "pickup_location" : "Kampala",
-            "destination": "Namugongo",
-            "items": [{"item_name": "Shoes", "item_weight": 40, "unit_delivery_price":"x"}]
-        }
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(parcel))
-        response = json.loads(post_request.data.decode())
-        self.assertIn("Parcel item unit delivery price must be an integer", response['message'])
-        self.assertEqual(post_request.status_code, 400)
+    
 
 
 if __name__ == ('__main__'):

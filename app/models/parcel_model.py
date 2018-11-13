@@ -6,28 +6,23 @@ parcels = []
 
 class Parcel():
     """Parcels class defining the parcel model"""
-    def __init__(self, user_id, parcel_id, pickup_location, destination, items):
+    def __init__(self, user_id, pickup_location, destination, items, recipient_name, recipient_mobile):
         self.user_id = user_id
         self.parcel_id = len(parcels) + 1
         self.pickup_location = pickup_location
         self.destination = destination
         self.instance_Items = items
         self.parcel_status = "pending"
+        self.recipient_name = recipient_name
+        self.recipient_mobile = recipient_mobile
 
-    def get_total_weight(self):
+
+    def get_total(self, variable):
         items = []
         for item in self.instance_Items:
             an_item = item.to_dict()
             items.append(an_item)
-            weight = sum([an_item['item_weight'] for an_item in items])
-        return weight
-
-    def get_total_price(self):
-        items = []
-        for item in self.instance_Items:
-            an_item = item.to_dict()
-            items.append(an_item)
-            total_price = sum([an_item['amount'] for an_item in items])
+            total_price = sum([an_item[variable] for an_item in items])
         return total_price
  
 
@@ -40,12 +35,14 @@ class Parcel():
         parcel = {
             "user_id": self.user_id,
             "parcel_id" : self.parcel_id,
+            "recipient_name": self.recipient_name,
+            "recipient_mobile": self.recipient_mobile,
             "pickup_location" : self.pickup_location,
             "destination": self.destination,
             "no_of_items": len(self.instance_Items),
             "items": items,
-            "total_weight":self.get_total_weight(),
-            "total_price": self.get_total_price(),
+            "total_weight":self.get_total('item_weight'),
+            "total_price": self.get_total('amount'),
             "status":self.parcel_status
         }
 
