@@ -3,24 +3,23 @@ from flask import jsonify
 from app.models.users_model import users
 
 parcels = []
-
 class Parcel():
     """Parcels class defining the parcel model"""
-    def __init__(self, user_id, pickup_location, destination, items, recipient_name, recipient_mobile):
-        self.user_id = user_id
+    def __init__(self, parcel, items):
+        self.user_id = parcel['user_id']
         self.parcel_id = len(parcels) + 1
-        self.pickup_location = pickup_location
-        self.destination = destination
+        self.pickup_location = parcel['pickup_location']
+        self.destination = parcel['destination']
         self.instance_Items = items
         self.parcel_status = "pending"
-        self.recipient_name = recipient_name
-        self.recipient_mobile = recipient_mobile
+        self.recipient_name = parcel['recipient_name']
+        self.recipient_mobile = parcel['recipient_mobile']
 
 
     def get_total(self, variable):
         items = []
         for item in self.instance_Items:
-            an_item = item.to_dict()
+            an_item = item.to_dictionary()
             items.append(an_item)
             total_price = sum([an_item[variable] for an_item in items])
         return total_price
@@ -30,7 +29,7 @@ class Parcel():
         items = []
 
         for item in self.instance_Items:
-            items.append(item.to_dict())
+            items.append(item.to_dictionary())
  
         parcel = {
             "user_id": self.user_id,
