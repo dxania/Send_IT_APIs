@@ -20,7 +20,7 @@ class Item:
         amount = weight * delivery_price
         return amount
 
-    def to_dict(self):
+    def to_dictionary(self):
         return {
             "item_name": self.item_name,
             "item_weight": self.item_weight,
