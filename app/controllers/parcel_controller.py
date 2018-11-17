@@ -1,4 +1,5 @@
 import re
+import json
 from flask import jsonify, request
 from app import app
 from app.models.parcel_model import Parcel, parcels
@@ -22,7 +23,7 @@ class Parcel_Controller:
         for parcel in parcels:
             parcels_list.append(parcel.to_dict())
         if parcels_list:
-            return jsonify({"number_of_parcel_delivery_orders":len(parcels_list)},{"parcels": parcels_list}), 200
+            return jsonify({"number_of_parcel_delivery_orders":len(parcels_list), "parcels": parcels_list}), 200
         return jsonify({"message":"There are no parcel delivery orders"}), 200
 
 
@@ -33,7 +34,7 @@ class Parcel_Controller:
             if parcel.to_dict()['user_id'] == user_id:
                 my_parcels.append(parcel.to_dict())
         if my_parcels:
-            return jsonify({"number_of_parcel_delivery_orders":len(my_parcels)},{'my_pacels':my_parcels}), 200
+            return jsonify({"number_of_parcel_delivery_orders":len(my_parcels), "my_pacels":my_parcels}), 200
         return jsonify({'message':'There are no parcels delivery orders created by that user or the user does not exist'}), 200
 
 
@@ -49,8 +50,8 @@ class Parcel_Controller:
         """Cancel a particular parcel delivery order"""
         for parcel in parcels:
             parcel_dict = parcel.to_dict()
-            if parcel_dict['parcel_id'] == parcel_id: 
-                parcel_dict["status"] = "cancelled"
+            if parcel_dict['parcel_id'] == parcel_id:
+                parcel_dict.update({"status":"cancelled"})
                 return jsonify({"Parcel_delivery_order_cancelled":parcel_dict}), 200
         return jsonify({'message':'There is no parcel with that ID'}), 200
 
@@ -84,10 +85,10 @@ class Parcel_Controller:
             for result_item in result_items:
                 item_name = result_item.get("item_name")
                 item_weight = result_item.get('item_weight')
-
                 validator = Validator.validate_item(result_item)
-                if len(validator) > 0:
-                    return jsonify({'errors':validator}), 400
+                msgs_list = validator['message(s)']
+                if len(msgs_list) > 0:
+                    return jsonify(validator), 400
                 item = Item(item_name , item_weight)
                 items.append(item) 
 
@@ -99,8 +100,9 @@ class Parcel_Controller:
             "destination": destination
         }
         validate_parcel = Validator.validate_parcel(parcel_dict)
-        if len(validate_parcel) > 0:
-            return jsonify({'errors':validate_parcel}), 400
+        msgs_list = validate_parcel['message(s)']
+        if len(msgs_list) > 0:
+            return jsonify(validate_parcel), 400
         parcel = Parcel(parcel_dict, items)
 
         for user in users:
