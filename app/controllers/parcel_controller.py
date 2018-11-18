@@ -59,6 +59,19 @@ class Parcel_Controller:
         return jsonify({'message': f"Parcel with ID {parcel_id} does not exist"}), 200
 
 
+    def change_present_location(parcel_id):
+        """Change the present location of a parcel delivery order"""
+        current_user = get_jwt_identity()
+        if current_user == 'admin':
+            user_input = request.get_json(force=True)
+            for parcel in parcels:
+                parcel_dict = parcel.to_dict()
+                if parcel_dict['parcel_id'] == parcel_id:
+                    parcel_dict.update({"present_location":user_input.get('present_location')})
+                    return jsonify({"Present_location_changed":parcel_dict}), 200
+            return jsonify({'message':'There is no parcel with that ID'}), 200
+        return jsonify({'message':'Invalid request! login or use the right access token'}), 400
+
     def cancel_parcel(parcel_id):
         """Cancel a particular parcel delivery order"""
         current_user = get_jwt_identity()

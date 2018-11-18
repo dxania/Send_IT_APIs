@@ -14,6 +14,7 @@ class Parcel():
         self.parcel_status = "pending"
         self.recipient_name = parcel['recipient_name']
         self.recipient_mobile = parcel['recipient_mobile']
+        self.present_location = "office"
 
 
     def get_total(self, variable):
@@ -42,7 +43,8 @@ class Parcel():
             "items": items,
             "total_weight":self.get_total('item_weight'),
             "total_price": self.get_total('amount'),
-            "status":self.parcel_status
+            "status":self.parcel_status,
+            "present_location": self.present_location
         }
 
         return parcel
