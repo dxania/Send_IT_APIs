@@ -25,10 +25,10 @@ class Validator:
         checkmatch_pickuplocation = charset.match(parcel['pickup_location'])
         checkmatch_destination = charset.match(parcel['destination'])
 
-        if not parcel['user_id']:
-            messages.append('User ID is required')
-        elif not isinstance(parcel['user_id'], int):
-            messages.append('Enter a valid user ID')     
+        # if not parcel['user_id']:
+        #     messages.append('User ID is required')
+        # elif not isinstance(parcel['user_id'], int):
+        #     messages.append('Enter a valid user ID')     
 
         if not parcel['recipient_name']:
             messages.append('Please enter a recipient name')
