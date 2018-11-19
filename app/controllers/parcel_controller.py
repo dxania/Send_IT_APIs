@@ -72,6 +72,18 @@ class Parcel_Controller:
             return jsonify({'message':'There is no parcel with that ID'}), 200
         return jsonify({'message':'Invalid request! login or use the right access token'}), 400
 
+    def change_parcel_destination(parcel_id):
+        """Change the destination of a parcel delivery order"""
+        current_user = get_jwt_identity()
+        user_input = request.get_json(force=True)
+        for parcel in parcels:
+            parcel_dict = parcel.to_dict()
+            if parcel_dict['parcel_id'] == parcel_id and current_user == parcel_dict['created_by']:  
+                parcel_dict.update({"destination":user_input.get('destination')})
+                return jsonify({"Destination_location_changed":parcel_dict}), 200
+            return jsonify({'message':f"Invalid request! You do not have rights to change the destination of parcel {parcel_id}"}), 400
+        return jsonify({'message':'There is no parcel with that ID'}), 200
+
     def cancel_parcel(parcel_id):
         """Cancel a particular parcel delivery order"""
         current_user = get_jwt_identity()
