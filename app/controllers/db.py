@@ -11,6 +11,7 @@ class DatabaseConnection:
         conn.autocommit = True
         self.cursor = conn.cursor()
         print (self.cursor)
+        print(db)
 
     def generate_hash(password):
         return sha256.hash(password)
