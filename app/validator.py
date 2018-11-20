@@ -1,41 +1,31 @@
 import re
+from flask import jsonify
 
 class Validator: 
     @staticmethod
-    def validate_item(item):
-        err_messages = []
-        errors_dict = {'message(s)':err_messages}
-        charset = re.compile('[A-Za-z]')
-        if not item.get("item_name") or not item.get('item_weight'):
-            err_messages.append('Item field is required')
-        else:
-            checkmatch = charset.match(item.get("item_name"))
-            if not checkmatch:
-                err_messages.append('Item name must be letters')
-            if not isinstance(item.get('item_weight'), int):
-                err_messages.append('Item weight must be a number')        
-        return errors_dict
-
+    def validate_str_to_change(arg):
+        if not arg:
+            return jsonify({"message":"Please enter a new value"}), 200
+        if not isinstance(arg, str):
+            return jsonify({"message":"The value must be a string"}), 200
+        if not arg.isalpha():
+            return jsonify({"message":"The value must be a letters"}), 200
+    
+    
     @staticmethod
     def validate_parcel(parcel):
         messages = []
         error_dict = {'message(s)':messages}
         charset = re.compile('[A-Za-z]')
-        checkmatch_recipientname = charset.match(parcel['recipient_name'])
-        checkmatch_pickuplocation = charset.match(parcel['pickup_location'])
-        checkmatch_destination = charset.match(parcel['destination'])
-
-        # if not parcel['user_id']:
-        #     messages.append('User ID is required')
-        # elif not isinstance(parcel['user_id'], int):
-        #     messages.append('Enter a valid user ID')     
 
         if not parcel['recipient_name']:
             messages.append('Please enter a recipient name')
         else:
             if not isinstance(parcel['recipient_name'], str):
                 messages.append('Recipient name must be a string')
-            elif not checkmatch_recipientname:
+            else:
+                checkmatch_recipientname = charset.match(parcel['recipient_name'])
+                if not checkmatch_recipientname:
                     messages.append('Recipient name must be letters')
 
         if not parcel['recipient_mobile']:
@@ -51,7 +41,9 @@ class Validator:
         else:
             if not isinstance(parcel['pickup_location'], str):
                 messages.append('Pickup location must be a string')
-            elif not checkmatch_pickuplocation:
+            else:
+                checkmatch_pickuplocation = charset.match(parcel['pickup_location'])
+                if not checkmatch_pickuplocation:
                     messages.append('Pickup location must be letters')
 
         if not parcel['destination']:
@@ -59,9 +51,38 @@ class Validator:
         else:
             if not isinstance(parcel['destination'], str):
                 messages.append('Destination must be a string')
-            elif not checkmatch_destination:
+            else:
+                checkmatch_destination = charset.match(parcel['destination'])
+                if not checkmatch_destination:
                     messages.append('Destination must be letters')
 
         return error_dict
+
+    @staticmethod
+    def validate_username(user_name):
+        if not user_name:
+            return jsonify({'message':'User name is required'}), 200
+        else:
+            if not isinstance(user_name, str):
+                return jsonify({'message':'User name must be a string'}), 200
+            else:
+                charset = re.compile('[A-Za-z]')
+                checkmatch = charset.match(user_name)
+                if not checkmatch:
+                    return jsonify({'message':'User name must be letters'}), 200
+                
+
+    @staticmethod
+    def validate_password(password):       
+        if not password:
+            return jsonify({'message':'Password is required'}), 200
+        else:
+            if not isinstance(password, str):
+                return jsonify({'message':'Password must be a string'}), 200
+            else:
+                charset2 = re.compile('[A-Za-z0-9]')
+                checkmatch = charset2.match(password)
+                if not checkmatch:
+                    return jsonify({'message':'Password should be letters and/or numbers'}), 200
 
 

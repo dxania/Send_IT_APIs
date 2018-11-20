@@ -20,6 +20,9 @@ mccabe==0.6.1
 more-itertools==4.3.0
 passlib==1.7.1
 pluggy==0.8.0
+postgres==2.2.2
+psycopg2==2.7.6.1
+psycopg2-binary==2.7.6.1
 py==1.7.0
 PyJWT==1.6.4
 pylint==2.1.1
@@ -31,5 +34,3 @@ typed-ast==1.1.0
 urllib3==1.24.1
 Werkzeug==0.14.1
 wrapt==1.10.11
-
-
