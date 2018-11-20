@@ -10,8 +10,10 @@ class DatabaseConnection:
         print(len(os.getenv('APP_SETTINGS')))
         if os.getenv('APP_SETTINGS') == 'testing':
             db = 'test_db'
-            
-        conn = psycopg2.connect(host="localhost", database=db, user="sendit", password="12345")
+                # conn = psycopg2.connect(host="localhost", database=db, user="sendit", password="12345")
+        # conn = psycopg2.connect(host="localhost", database=db, user="sendit", password="12345")
+        conn = psycopg2.connect(host="localhost", database=db, user="postgres", password="psql")
+
         conn.autocommit = True
         self.cursor = conn.cursor()
         print (self.cursor)
