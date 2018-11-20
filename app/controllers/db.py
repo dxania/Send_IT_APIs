@@ -5,12 +5,8 @@ from passlib.hash import pbkdf2_sha256 as sha256
 class DatabaseConnection:
     def __init__(self):
         db = 'sendit'
-        print('######## app settings########')
-        print(os.getenv('APP_SETTINGS'))
-        print(len(os.getenv('APP_SETTINGS')))
         if os.getenv('APP_SETTINGS') == 'testing':
             db = 'test_db'
-                # conn = psycopg2.connect(host="localhost", database=db, user="sendit", password="12345")
         # conn = psycopg2.connect(host="localhost", database=db, user="sendit", password="12345")
         conn = psycopg2.connect(host="localhost", database=db, user="postgres", password="psql")
 
