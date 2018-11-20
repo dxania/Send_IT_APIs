@@ -21,18 +21,11 @@ def get_parcels_by_user(user_id):
     """Retrieve all parcels by a specific user"""
     return Parcel_Controller.get_parcels_by_user(user_id)
 
-
 @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
 @jwt_required
 def get_parcel(parcel_id):
     """Retrieve a particular parcel"""
     return Parcel_Controller.get_parcel(parcel_id)
-
-
-# @app.route('/api/v1/parcels/<int:parcel_id>/cancel', methods = ['PUT'])
-# def cancel_parcel(parcel_id):
-#     """Cancel a particular parcel delivery order"""
-#     return Parcel_Controller.cancel_parcel(parcel_id)
 
 
 @app.route('/api/v1/parcels/<int:parcel_id>/present_location', methods = ['PUT'])
@@ -47,17 +40,6 @@ def change_location(parcel_id):
 def change_status(parcel_id):
     """Cancel a particular parcel delivery order by a user"""
     return Parcel_Controller.change_parcel_status(parcel_id)
-
-# @app.route('/api/v1/users/<int:user_id>/<int:parcel_id>/cancel', methods = ['PUT'])
-# def cancel_parcel_by_user(parcel_id, user_id):
-#     """Cancel a particular parcel delivery order by a user"""
-#     return Parcel_Controller.cancel_parcel_by_user(parcel_id, user_id)
-
-@app.route('/api/v1/parcels/<int:parcel_id>/cancel', methods = ['PUT'])
-@jwt_required
-def cancel_parcel(parcel_id):
-    """Cancel a particular parcel delivery order by a user"""
-    return Parcel_Controller.cancel_parcel(parcel_id)
 
 
 @app.route('/api/v1/parcels/<int:parcel_id>/destination', methods = ['PUT'])

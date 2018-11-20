@@ -3,6 +3,8 @@ import unittest
 from app import app
 from app.routes.parcel_routes import *
 from app.routes.user_routes import *
+from app.controllers.db import DatabaseConnection
+
 
 test_user ={
     "user_name" : "andrew",
@@ -10,12 +12,16 @@ test_user ={
 }
 
 test_parcel = {
-    "recipient_name": "Corn",
+    "recipient_name" : "cara",
     "recipient_mobile": 1234567890,
-    "pickup_location" : "Kampala",
-    "destination": "Namugongo",
-    "items": [{"item_name": "Shoes", "item_weight": 40}]
+    "pickup_location" : "op",
+    "destination": "ki",
+    "weight":200,
+    "total_price":2000
 }
+
+db = DatabaseConnection()
+
 
 class Base(unittest.TestCase):
     """Base class for tests. 
@@ -26,21 +32,12 @@ class Base(unittest.TestCase):
 
     def setUp(self):
         self.app_client = app.test_client()
+        db.setUp()
 
-        # create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(test_user))
-        # self.assertEqual(create_user.status_code, 201)
-        
-        # login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"andrew", "password":"alg"}))
-        # self.assertEqual(login_user.status_code, 200)
-        # response = json.loads(login_user.data.decode())
-        # self.assertEqual(response['message'], 'You have successfully been logged in as andrew')
-        # self.user_access_token = response['access_token']
-        
-        # admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
-        # self.assertEqual(admin_login.status_code, 200)
-        # response = json.loads(admin_login.data.decode())
-        # self.assertEqual(response['message'], 'You have been logged in as admin')
-        # self.admin_access_token = response['access_token']
+    def tearDown(self):
+        db.delete_tables()
+
+
 
 
 class Endpoints(Base):
@@ -62,7 +59,7 @@ class Endpoints(Base):
         admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
         self.assertEqual(admin_login.status_code, 200)
         response = json.loads(admin_login.data.decode())
-        self.assertEqual(response['message'], 'You have been logged in as admin')
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
         self.admin_access_token = response['access_token']
 
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
@@ -70,20 +67,41 @@ class Endpoints(Base):
         self.assertEqual(post_request.status_code, 201)
         self.assertEqual(put_request.status_code, 200)
 
-    # def test_change_destination(self):
-    #     create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
-    #     self.assertEqual(create_user.status_code, 201)
+    def test_change_status(self):
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(test_user))
+        self.assertEqual(create_user.status_code, 201)
         
-    #     login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
-    #     self.assertEqual(login_user.status_code, 200)
-    #     response = json.loads(login_user.data.decode())
-    #     self.assertEqual(response['message'], 'You have successfully been logged in as joel')
-    #     self.user_access_token = response['access_token']
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"andrew", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as andrew')
+        self.user_access_token = response['access_token']
+        
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+        put_request = self.app_client.put("/api/v1/parcels/1/status", content_type='application/json', data=json.dumps({"status":"cancelled"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        self.assertEqual(post_request.status_code, 201)
+        self.assertEqual(put_request.status_code, 200)
+
+    def test_change_destination(self):
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
  
-    #     post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
-    #     put_request = self.app_client.put("/api/v1/parcels/1/destination", content_type='application/json', data=json.dumps({"destination":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
-    #     self.assertEqual(post_request.status_code, 201)
-    #     self.assertEqual(put_request.status_code, 200)
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+        put_request = self.app_client.put("/api/v1/parcels/1/destination", content_type='application/json', data=json.dumps({"destination":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        self.assertEqual(post_request.status_code, 201)
+        self.assertEqual(put_request.status_code, 200)
 
 class Set(Base):
     """
@@ -95,7 +113,7 @@ class Set(Base):
         admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
         self.assertEqual(admin_login.status_code, 200)
         response = json.loads(admin_login.data.decode())
-        self.assertEqual(response['message'], 'You have been logged in as admin')
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
         self.admin_access_token = response['access_token']
 
         put_request = self.app_client.put("/api/v1/parcels/100/present_location", data=json.dumps({"present_location":"masaka"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
@@ -103,23 +121,254 @@ class Set(Base):
         self.assertEqual(put_request.status_code, 200)
         self.assertEqual(response['message'], "There is no parcel with that ID")
 
-    # def test_change_destination_non_existent_parcel_delivery_order(self):       
-    #     create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"momo", "password":"alg"}))
-    #     self.assertEqual(create_user.status_code, 201)
+    def test_change_status_non_existent_parcel_delivery_order(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":"cancelled"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "There is no parcel with that ID")
+
+    def test_change_status_wrong_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
         
-    #     login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"momo", "password":"alg"}))
-    #     self.assertEqual(login_user.status_code, 200)
-    #     response = json.loads(login_user.data.decode())
-    #     self.assertEqual(response['message'], 'You have successfully been logged in as momo')
-    #     self.user_access_token = response['access_token']
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
 
-    #     put_request = self.app_client.put("/api/v1/parcels/100/destination", data=json.dumps({"destination":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
-    #     response = json.loads(put_request.data.decode())
-    #     # self.assertEqual(put_request.status_code, 200)
-    #     self.assertEqual(response['message'], "There is no parcel with that ID")
+        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":"okay"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "Status can only be ['pending', 'in-transit', 'cancelled', 'delivered']")
+
+    def test_change_status_empty_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":""}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "Please enter a new value")
+
+    def test_change_status_int_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":90}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a string")
+
+    def test_change_status_letters_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":"90"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a letters")
 
 
-    def test_wrong_user_change_pickup_location(self):
+    def test_present_location_empty_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/present_location", data=json.dumps({"present_location":""}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "Please enter a new value")
+
+    def test_present_location_int_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/present_location", data=json.dumps({"present_location":90}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a string")
+
+    def test_change_present_location_letters_value(self):       
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/present_location", data=json.dumps({"present_location":"90"}), headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a letters")
+
+
+    def test_destination_empty_value(self):       
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/destination", data=json.dumps({"destination":""}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "Please enter a new value")
+
+    def test_destination_int_value(self):       
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/destination", data=json.dumps({"destination":90}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a string")
+
+    def test_change_destination_letters_value(self):       
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"joel", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as joel')
+        self.user_access_token = response['access_token']
+ 
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/destination", data=json.dumps({"destination":"90"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "The value must be a letters")
+
+
+    
+
+        
+
+    def test_change_destination_non_existent_parcel_delivery_order(self):       
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"momo", "password":"alg"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"momo", "password":"alg"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as momo')
+        self.user_access_token = response['access_token']
+
+        put_request = self.app_client.put("/api/v1/parcels/100/destination", data=json.dumps({"destination":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 200)
+        self.assertEqual(response['message'], "There is no parcel with that ID")
+
+
+    def test_wrong_user_change_present_location(self):
         create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"myriam", "password":"sleeve"}))
         self.assertEqual(create_user.status_code, 201)
         
@@ -129,10 +378,47 @@ class Set(Base):
         self.assertEqual(response['message'], 'You have successfully been logged in as myriam')
         self.user_access_token = response['access_token']
 
-        put_request = self.app_client.put("/api/v1/parcels/1/present_location", data=json.dumps({"present_location":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token}"})
+        create_user2 = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        self.assertEqual(create_user2.status_code, 201)
+        
+        login_user2 = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        self.assertEqual(login_user2.status_code, 200)
+        response2 = json.loads(login_user2.data.decode())
+        self.assertEqual(response2['message'], 'You have successfully been logged in as harriet')
+        self.user_access_token2 = response2['access_token']
+
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/present_location", data=json.dumps({"present_location":"masaka"}), headers={'Authorization': f"Bearer {self.user_access_token2}"})
         response = json.loads(put_request.data.decode())
         self.assertEqual(put_request.status_code, 400)
         self.assertEqual(response['message'], "Invalid request! login or use the right access token")
+
+    def test_wrong_user_change_status(self):
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"myriam", "password":"sleeve"}))
+        self.assertEqual(create_user.status_code, 201)
+        
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"myriam", "password":"sleeve"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as myriam')
+        self.user_access_token = response['access_token']
+
+        create_user2 = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        self.assertEqual(create_user2.status_code, 201)
+        
+        login_user2 = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        self.assertEqual(login_user2.status_code, 200)
+        response2 = json.loads(login_user2.data.decode())
+        self.assertEqual(response2['message'], 'You have successfully been logged in as harriet')
+        self.user_access_token2 = response2['access_token']
+
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
+
+        put_request = self.app_client.put("/api/v1/parcels/1/status", data=json.dumps({"status":"cancelled"}), headers={'Authorization': f"Bearer {self.user_access_token2}"})
+        response = json.loads(put_request.data.decode())
+        self.assertEqual(put_request.status_code, 400)
+        self.assertEqual(response['message'], "Invalid request! You do not have rights to change the status of parcel 1")
 
     def test_wrong_user_change_destination(self):
         create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"ryan", "password":"sleeve"}))
