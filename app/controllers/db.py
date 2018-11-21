@@ -28,18 +28,10 @@ class DatabaseConnection:
         )"""
         self.cursor.execute(users_table)
 
-        check_no_of_rows = "SELECT * FROM users"
-        self.cursor.execute(check_no_of_rows)
-        result = self.cursor.fetchall()
-        if len(result)==0:
-            insert_admin = "INSERT INTO users (user_name, password) values ('admin', '{}')".format(password)
-            update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
-            self.cursor.execute(insert_admin)
-            self.cursor.execute(update_to_admin)
 
         parcels_table = """CREATE TABLE IF NOT EXISTS parcels(
             parcel_id SERIAL PRIMARY KEY,
-            user_name VARCHAR(25) REFERENCES users (user_name),
+            user_name VARCHAR(25) NOT NULL,
             recipient_name VARCHAR(25) NOT NULL,
             recipient_mobile VARCHAR(25) NOT NULL,    
             pickup_location VARCHAR(25) NOT NULL,
@@ -52,9 +44,15 @@ class DatabaseConnection:
         self.cursor.execute(parcels_table)
 
         password = DatabaseConnection.generate_hash("root")
+        check_no_of_rows = "SELECT * FROM users"
+        self.cursor.execute(check_no_of_rows)
+        result = self.cursor.fetchall()
+        if len(result)==0:
+            insert_admin = "INSERT INTO users (user_name, password) values ('admin', '{}')".format(password)
+            update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
+            self.cursor.execute(insert_admin)
+            self.cursor.execute(update_to_admin)
         
-        
-
         
     def insert_user(self, user_name, password):
         insert_user = "INSERT INTO users (user_name, password) values ('{}', '{}')".format(user_name, password)
