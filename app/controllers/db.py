@@ -4,7 +4,7 @@ from passlib.hash import pbkdf2_sha256 as sha256
 
 class DatabaseConnection:
     def __init__(self):
-         db = 'd8l5eq5eakmkcm'
+        db = 'd8l5eq5eakmkcm'
         # db = 'sendit'
         if os.getenv('APP_SETTINGS') == 'testing':
             db = 'test_db'
