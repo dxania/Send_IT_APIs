@@ -1,10 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from app.controllers.db import DatabaseConnection
 
 app = Flask(__name__)
-db = DatabaseConnection()
-db.setUp()
 
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 

@@ -28,9 +28,18 @@ class DatabaseConnection:
         )"""
         self.cursor.execute(users_table)
 
+        check_no_of_rows = "SELECT * FROM users"
+        self.cursor.execute(check_no_of_rows)
+        result = self.cursor.fetchall()
+        if len(result)==0:
+            insert_admin = "INSERT INTO users (user_name, password) values ('admin', '{}')".format(password)
+            update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
+            self.cursor.execute(insert_admin)
+            self.cursor.execute(update_to_admin)
+
         parcels_table = """CREATE TABLE IF NOT EXISTS parcels(
             parcel_id SERIAL PRIMARY KEY,
-            user_id VARCHAR(25) REFERENCES users (user_name),
+            user_name VARCHAR(25) REFERENCES users (user_name),
             recipient_name VARCHAR(25) NOT NULL,
             recipient_mobile VARCHAR(25) NOT NULL,    
             pickup_location VARCHAR(25) NOT NULL,
@@ -44,14 +53,7 @@ class DatabaseConnection:
 
         password = DatabaseConnection.generate_hash("root")
         
-        check_no_of_rows = "SELECT * FROM users"
-        self.cursor.execute(check_no_of_rows)
-        result = self.cursor.fetchall()
-        if len(result)==0:
-            insert_admin = "INSERT INTO users (user_name, password) values ('admin', '{}')".format(password)
-            update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
-            self.cursor.execute(insert_admin)
-            self.cursor.execute(update_to_admin)
+        
 
         
     def insert_user(self, user_name, password):
@@ -63,8 +65,8 @@ class DatabaseConnection:
         self.cursor.execute(select_user)
         return [user_name,password]
 
-    def add_parcel(self, user_id, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price):
-        insert_parcel = "INSERT INTO parcels (user_id, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_id, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price)
+    def add_parcel(self, user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price):
+        insert_parcel = "INSERT INTO parcels (user_name, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price)
         self.cursor.execute(insert_parcel)
 
     def get_all_parcels(self):
@@ -79,8 +81,8 @@ class DatabaseConnection:
         result = self.cursor.fetchone()
         return result
 
-    def get_parcels_by_user(self, user_id):
-        get_user_parcels = "SELECT * FROM parcels WHERE user_id = '{}'".format(user_id)
+    def get_parcels_by_user(self, user_name):
+        get_user_parcels = "SELECT * FROM parcels WHERE user_name = '{}'".format(user_name)
         self.cursor.execute(get_user_parcels)
         result = self.cursor.fetchone()
         return result
