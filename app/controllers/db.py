@@ -7,8 +7,7 @@ class DatabaseConnection:
         db = 'd8l5eq5eakmkcm'
         if os.getenv('APP_SETTINGS') == 'testing':
             db = 'test_db'
-        conn = psycopg2.connect(host="ec2-23-23-101-25.compute-1.amazonaws.com", database=db, user="etpyvilhgiqvvw", password="999f624546819f9983ca1f6885672a281c4fe8ea23cbe3af4e42b98254b57cdd" port=5432)
-
+        conn = psycopg2.connect(host="ec2-23-23-101-25.compute-1.amazonaws.com", database=db, user="etpyvilhgiqvvw", password="999f624546819f9983ca1f6885672a281c4fe8ea23cbe3af4e42b98254b57cdd", port=5432)
         conn.autocommit = True
         self.cursor = conn.cursor()
         print (self.cursor)
