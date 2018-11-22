@@ -5,7 +5,6 @@ from flask_jwt_extended import (create_access_token, get_jwt_identity)
 from app import app
 from app.models.parcel_model import Parcel
 from app.models.users_model import *
-from app.models.item_model import Item
 from app.validator import Validator
 from app.controllers.db import DatabaseConnection
 
