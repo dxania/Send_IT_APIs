@@ -4,6 +4,7 @@ from passlib.hash import pbkdf2_sha256 as sha256
 
 class DatabaseConnection:
     def __init__(self):
+
         # db = 'd8l5eq5eakmkcm'
         db = 'sendit'
         if os.getenv('APP_SETTINGS') == 'testing':
@@ -27,6 +28,7 @@ class DatabaseConnection:
         )"""
         self.cursor.execute(users_table)
 
+
         parcels_table = """CREATE TABLE IF NOT EXISTS parcels(
             parcel_id SERIAL PRIMARY KEY,
             user_name VARCHAR(25) NOT NULL,
@@ -42,7 +44,6 @@ class DatabaseConnection:
         self.cursor.execute(parcels_table)
 
         password = DatabaseConnection.generate_hash("root")
-        
         check_no_of_rows = "SELECT * FROM users"
         self.cursor.execute(check_no_of_rows)
         result = self.cursor.fetchall()
@@ -51,7 +52,7 @@ class DatabaseConnection:
             update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
             self.cursor.execute(insert_admin)
             self.cursor.execute(update_to_admin)
-
+        
         
     def insert_user(self, user_name, password):
         insert_user = "INSERT INTO users (user_name, password) values ('{}', '{}')".format(user_name, password)
@@ -64,6 +65,7 @@ class DatabaseConnection:
 
     def add_parcel(self, user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price):
         insert_parcel = "INSERT INTO parcels (user_name, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price, present_location) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price, pickup_location)
+
         self.cursor.execute(insert_parcel)
 
     def get_all_parcels(self):
