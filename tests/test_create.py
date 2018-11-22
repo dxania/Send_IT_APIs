@@ -22,8 +22,7 @@ db = DatabaseConnection()
 
 class Base(unittest.TestCase):
     """Base class for tests. 
-    This class defines a common `setUp` 
-    method that defines attributes which 
+    This class defines a common `setUp` method that defines attributes which 
     are used in the various tests.
     """
 
@@ -35,31 +34,36 @@ class Base(unittest.TestCase):
         db.delete_tables()
 
     def admin_login(self):
-        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", data=json.dumps({"user_name":"admin", "password":"root"}))
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
+            data=json.dumps({"user_name":"admin", "password":"root"}))
         self.assertEqual(admin_login.status_code, 200)
         response = json.loads(admin_login.data.decode())
         self.assertEqual(response['message'], 'You have successfully been logged in as admin')
         self.admin_access_token = response['access_token']
 
     def sign_up(self):
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"eve", "password":"alg"}))
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
+            data=json.dumps({"user_name":"eve", "password":"alg"}))
         self.assertEqual(create_user.status_code, 201)
 
     def user_login(self):
         self.sign_up()
-        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"eve", "password":"alg"}))
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
+            data=json.dumps({"user_name":"eve", "password":"alg"}))
         self.assertEqual(login_user.status_code, 200)
         response = json.loads(login_user.data.decode())
         self.assertEqual(response['message'], 'You have successfully been logged in as eve')
         self.user_access_token = response['access_token']
 
     def sign_up_user2(self):
-        create_user2 = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        create_user2 = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
+            data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
         self.assertEqual(create_user2.status_code, 201)
 
     def user2_login(self):
         self.sign_up_user2()
-        login_user2 = self.app_client.post('/api/v1/auth/login', content_type='application/json', data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+        login_user2 = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
+            data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
         self.assertEqual(login_user2.status_code, 200)
         response2 = json.loads(login_user2.data.decode())
         self.assertEqual(response2['message'], 'You have successfully been logged in as harriet')
@@ -67,39 +71,33 @@ class Base(unittest.TestCase):
 
 class Endpoints(Base):
     """
-    Tests all aspects of endpoints
-    Tests include: creating a parcel delivery order, getting all parcel delivery orders,
-    getting a particular parcel delivery order, canceling a parcel delivery order,
-    getting all parcel delivery orders by a specific user.  
+    Tests all aspects of the create parcel endpoint
+    Tests include: creating a parcel delivery order.  
     """
     def test_admin_create_parcel(self):
         self.admin_login()
-
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
             data=json.dumps(test_parcel), headers={'Authorization': f"Bearer {self.admin_access_token}"})
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual(post_request.status_code, 400)
         post_response = json.loads(post_request.data.decode())
         self.assertEqual(post_response["message"], "You cannot create parcel delivery orders")
 
     def test_create_parcel(self):
         self.user_login()
-
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         self.assertEqual(post_request.status_code, 201)
         response = json.loads(post_request.data.decode())
         self.assertEqual(response['message'], 'Parcel successfully created')
         
 
-
 class Set(Base):
     """
     Tests all aspects of setting attributes
-    Tests include: setting attributes of right type, setting attributes of wrong type, 
+    Tests include: setting attributes of wrong type, 
     setting attributes outside their constraints, setting empty attributes.
     """
     def test_recipient_name_string(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : 90,
             "recipient_mobile": 1234567890,
@@ -117,7 +115,6 @@ class Set(Base):
 
     def test_recipient_name_letters(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "2",
             "recipient_mobile": 1234567890,
@@ -135,7 +132,6 @@ class Set(Base):
 
     def test_recipient_name_required(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "",
             "recipient_mobile": 1234567890,
@@ -151,7 +147,6 @@ class Set(Base):
 
     def test_recipient_mobile_required(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": "",
@@ -168,7 +163,6 @@ class Set(Base):
 
     def test_recipient_mobile_number(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": "pill",
@@ -184,15 +178,13 @@ class Set(Base):
 
     def test_recipient_mobile_valid(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1,
             "pickup_location" : "gulu",
             "destination": "kampala",
             "weight":200,
-        }
-        
+        }   
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json',
             data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
@@ -201,7 +193,6 @@ class Set(Base):
 
     def test_pickup_location_required(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -209,7 +200,6 @@ class Set(Base):
             "destination": "kampala",
             "weight":200,
         }
-
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
             data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
@@ -218,7 +208,6 @@ class Set(Base):
 
     def test_pickup_location_string(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -226,7 +215,6 @@ class Set(Base):
             "destination": "kampala",
             "weight":200,
         }
-
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
             data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
@@ -236,7 +224,6 @@ class Set(Base):
 
     def test_destination_required(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -244,15 +231,14 @@ class Set(Base):
             "destination": "",
             "weight":200,
         }
-
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), 
+            headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
         self.assertIn("Please enter the destination", response['message(s)'][0])
         self.assertEqual(post_request.status_code, 400)
 
     def test_pickup_location_letters(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -270,7 +256,6 @@ class Set(Base):
 
     def test_destination_letters(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -278,15 +263,14 @@ class Set(Base):
             "destination": "6",
             "weight":200,
         }
-
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
+            data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
         self.assertIn("destination must be letters", response['message(s)'][0])
         self.assertEqual(post_request.status_code, 400)
 
     def test_destination_string(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -294,8 +278,8 @@ class Set(Base):
             "destination": 7,
             "weight":200,
         }
-
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
+        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
+            data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())
         self.assertIn("destination must be a string", response['message(s)'][0])
         self.assertEqual(post_request.status_code, 400)
@@ -303,7 +287,6 @@ class Set(Base):
 
     def test_weight_required(self):
         self.user_login()
-
         test_parcel = {
             "recipient_name" : "cara",
             "recipient_mobile": 1234567890,
@@ -311,7 +294,6 @@ class Set(Base):
             "destination": "kampala",
             "weight":"",
         }
-
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
             data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})
         response = json.loads(post_request.data.decode())

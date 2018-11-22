@@ -20,15 +20,14 @@ class User_Controller:
         username = user_input.get("user_name")
         password = user_input.get("password")
         validate = Validator.validate_user_credentials(username, password)
-        if validate is not None:
+        if validate:
             return validate
-
         user = db.get_user(username)
-        if user is not None:
+        if user:
             verify_password = User_Controller.verify_hash(user_input.get("password"), user[2])
             if verify_password:
                 select = db.login_user(username, verify_password)
-                if select is not None:
+                if select:
                     access_token = create_access_token(identity = username)
                     return jsonify({
                         'message': f"You have successfully been logged in as {username}",
