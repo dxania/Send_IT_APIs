@@ -1,9 +1,8 @@
 # Send_IT_APIs
 Set of API endpoints to be consumed by a courier service application 
 
-
-[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=ft-send-IT-with-database)](https://travis-ci.org/dxania/Send_IT_APIs)
-[![Coverage Status](https://coveralls.io/repos/github/dxania/Send_IT_APIs/badge.svg?branch=ft-send-IT-with-database)](https://coveralls.io/github/dxania/Send_IT_APIs?branch=ft-send-IT-with-database)
+[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=ft-send-IT-with-database)](https://travis-ci.org/dxania/Send_IT_APIs) 
+[![Coverage Status](https://coveralls.io/repos/github/dxania/Send_IT_APIs/badge.svg?branch=ft-send-IT-with-database)](https://coveralls.io/github/dxania/Send_IT_APIs?branch=ft-send-IT-with-database) 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8dc6eba4cf7bb21cf416/maintainability)](https://codeclimate.com/github/dxania/Send_IT_APIs/maintainability)
 
 
@@ -11,15 +10,18 @@ Set of API endpoints to be consumed by a courier service application
 The API offers the following set of endpoints:
 
 
-  | REQUEST      | ROUTE                               | FUNCTIONALITY                                                      |
-  |--------------|-------------------------------------|--------------------------------------------------------------------|
-  |  GET         | /parcels                            | Fetch all parcel delivery orders                                   |
-  |  GET         | /parcels/[parcelId]                 | Fetch a specific parcel delivery order                             | 
-  |  GET         | /users/[userId]/parcels             | Fetch all parcel delivery orders by a specific user                | 
-  |  PUT         | /parcels/[parcelId]/cancel          | Cancel a specific parcel delivery order                            | 
-  |  POST        | /parcels                            | Create a parcel delivery order                                     | 
-  |  PUT         | /users/[userId]/[parcelId]/cancel   | Cancel a specific parcel delivery order created by a specific user |
-  |  POST        | /users                              | Create a user                                                      |
+  | REQUEST      | ROUTE                               | FUNCTIONALITY                                                      | PROTECTED  |
+  |--------------|-------------------------------------|--------------------------------------------------------------------|------------|
+  |  POST        | /auth/signup                        | Register a user                                                    |   NO       |
+  |  POST        | /auth/login                         | Login a user                                                       |   NO       |
+  |  POST        | /parcels                            | Create a parcel delivery order                                     |   YES      |
+  |  GET         | /parcels                            | Fetch all parcel delivery orders                                   |   YES      |
+  |  GET         | /parcels/[parcelId]                 | Fetch a specific parcel delivery order                             |   YES      |
+  |  GET         | /users/[userId]/parcels             | Fetch all parcel delivery orders by a specific user                |   YES      |
+  |  PUT         | /parcels/[parcelId]/destination     | Change the destination of a specific parcel delivery order         |   YES      |
+  |  PUT         | /parcels/[parcelId]/present_location| Change the present location of a specific parcel delivery order    |   YES      |
+  |  PUT         | /parcels/[parcelId]/status          | Change the status of a specific parcel delivery order              |   YES      |
+  |  GET         | /users                              | Fetch all registered users                                         |   YES      |
 
 ## Getting started
 These instructions will get you a copy of the program on your local machine for development and testing purposes. The instructions are tailored for uses of `LINUX OS` particularly `UBUNTU`
@@ -52,7 +54,10 @@ Pytest to perform tests
 Alternatively, run `pip install -r requirements.txt` to install all the necessary tools
 
 ## Built With
-[Flask](http://flask.pocoo.org/) -  microframework for Python
+1. [Flask](http://flask.pocoo.org/) -  microframework for Python
+2. [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/en/latest/)
+3. [PostgreSQL](https://www.postgresql.org/) 
+4. [Passlib](https://passlib.readthedocs.io/en/stable/install.html)
 
 ## Installing
 To have a copy of the project on your machine, run the command below in your preferred directory:
@@ -76,11 +81,99 @@ You should see the name of the virtual environment placed right before your curr
 
 ## Testing
 1. Run `pytest` or `pytest tests/<test_file_name>` in the directory of the project to run unit tests
-2. Test with [Postman](https://www.getpostman.com/) by pasting the url [http://127.0.0.1:5000/api/v1/parcels](http://127.0.0.1:5000/api/v1/parcels) as Admin or [http://127.0.0.1:5000/api/v1/users/parcels](http://127.0.0.1:5000/api/v1/sales/parcels) as a specific user into the url section and call the GET/POST methods accordingly. (For the POST requests, enter the data as raw application/json)
+2. Test with [Postman](https://www.getpostman.com/) by pasting the url [https://send-it-api-app.herokuapp.com/api/v1/auth/signup](http://127.0.0.1:5000/api/v1/auth/signup) (For the POST requests, enter the data as raw application/json)
+
+## Sample Requests and Responses for a non admin user
+
+### Sign up
+Endpoint `/api/v1/auth/signup`
+
+Input
+```
+    {
+        "user_name":"Dee",
+        "password":"warmups"
+    }
+```
+Output 
+```
+{"message":"User Dee successfully created"}
+```
+
+### Login
+Endpoint `/api/v1/auth/login`
+
+Input
+```
+    {
+        "user_name":"Dee",
+        "password":"warmups"
+    }
+```
+
+Output
+```
+    {
+        "access_token" : some access token,
+        "message":"You have sucessfully been logged in as Dee"
+    }
+```
+
+### Create parcel
+Endpoint `/api/v1/parcels`
+
+Input
+```
+    {
+        "recipient_name":"leonne",
+        "recipient_mobile": 1234567890,
+        "pickup_location":"Entebbe",
+        "destination":"Mombasa",
+        "weight": 900
+    }
+```
+Output 
+
+```
+    {"message":"Parcel successfully created"}
+```
+
+### Get the parcel
+Endpoint `/api/v1/parcels/1`
+
+Output
+
+```
+    {
+    "parcel": {
+        "created_by": "Dee",
+        "destination": "Mombasa",
+        "parcel_id": 1,
+        "pickup_location": "Entebbe",
+        "present_location": "Entebbe",
+        "recipient_mobile": "1234567890",
+        "recipient_name": "leonne",
+        "status": "pending",
+        "total_price": 100000,
+        "weight": 900
+    }
+}
+```
+
+### Update the destination
+Endpoint `/api/v1/parcels/1/destination`
+
+Input
+```
+    {"destination":"Nairobi"}    
+```
+Output
+```
+    {"message":f"Destination of parcel 1 changed to Nairobi"}
+```
 
 ## Deployment
-Deployed on heroku.
-Visit the this [link](https://send-it-api-app.herokuapp.com/) to interact with the deployed app
+Deployed on [heroku](https://send-it-api-app.herokuapp.com/) 
 
 ## Author
 [Daizy Obura](https://github.com/dxania/)
