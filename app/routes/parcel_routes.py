@@ -52,7 +52,4 @@ def change_destination(parcel_id):
 @jwt_required
 def create_parcel():
     """Create a parcel function wrapped around the Post /parcels endpoint"""
-    current_user = get_jwt_identity()
-    if current_user:
-        return Parcel_Controller.create_parcel()
-    return jsonify({'message':'Invalid request! login or use the right access token'})
+    return Parcel_Controller.create_parcel()

@@ -2,55 +2,40 @@ import json
 from flask import jsonify
 from app.models.users_model import users
 
-parcels = []
 class Parcel():
     """Parcels class defining the parcel model"""
-    def __init__(self, user_id, parcel):
-    # def __init__(self, user_id, parcel, items):
-    
+    def __init__(self, user_id, parcel):    
         self.user_id = user_id
         self.pickup_location = parcel['pickup_location']
         self.destination = parcel['destination']
-        # self.instance_Items = items
-        # self.parcel_status = "pending"
         self.recipient_name = parcel['recipient_name']
         self.recipient_mobile = parcel['recipient_mobile']
-        # self.present_location = "office"
         self.weight = parcel['weight']
         self.total_price = parcel['total_price']
 
+    @staticmethod
+    def get_delivery_price(weight):
+        if isinstance(weight, int):
+            if weight<500:
+                delivery_price = 10000
+            elif 501<weight<1000:
+                delivery_price = 100000
+            else: 
+                delivery_price = 1000000
+            return delivery_price
 
-    # def get_total(self, variable):
-    #     items = []
-    #     for item in self.instance_Items:
-    #         an_item = item.to_dictionary()
-    #         items.append(an_item)
-    #         total_price = sum([an_item[variable] for an_item in items])
-    #     return total_price
- 
-
-    def to_dict(self):
-        # items = []
-
-        # for item in self.instance_Items:
-        #     items.append(item.to_dictionary())
- 
-        parcel = {
-            "created_by": self.user_id,
-            # "parcel_id" : self.parcel_id,
-            "recipient_name": self.recipient_name,
-            "recipient_mobile": self.recipient_mobile,
-            "pickup_location" : self.pickup_location,
-            "destination": self.destination,
-            
-            # "no_of_items": len(self.instance_Items),
-            # "items": items,
-            "weight":self.weight,
-            # "total_weight":self.get_total('item_weight'),
-            # "total_price": self.get_total('amount'),
-            "total_price":self.total_price
-            # "status":self.parcel_status,
-            # "present_location": self.present_location
+    @staticmethod
+    def to_dict(parcel):
+        parcel_dict = {
+            "parcel_id": parcel[0],
+            "created_by": parcel[1],
+            "recipient_name": parcel[2],
+            "recipient_mobile": parcel[3],
+            "pickup_location" : parcel[4],
+            "destination": parcel[5],
+            "weight": parcel[6],
+            "total_price":parcel[7],
+            "status": parcel[8],
+            "present_location": parcel[9]
         }
-
-        return parcel
+        return parcel_dict

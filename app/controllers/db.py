@@ -4,13 +4,13 @@ from passlib.hash import pbkdf2_sha256 as sha256
 
 class DatabaseConnection:
     def __init__(self):
-        db = 'd8l5eq5eakmkcm'
-        # db = 'sendit'
+
+        # db = 'd8l5eq5eakmkcm'
+        db = 'sendit'
         if os.getenv('APP_SETTINGS') == 'testing':
             db = 'test_db'
-        # conn = psycopg2.connect(host="localhost", database=db, user="postgres", password="psql")
-        conn = psycopg2.connect(host="ec2-23-23-101-25.compute-1.amazonaws.com", database=db, user="etpyvilhgiqvvw", password="999f624546819f9983ca1f6885672a281c4fe8ea23cbe3af4e42b98254b57cdd", port=5432)
-
+        conn = psycopg2.connect(host="localhost", database=db, user="postgres", password="psql")
+        # conn = psycopg2.connect(host="ec2-23-23-101-25.compute-1.amazonaws.com", database=db, user="etpyvilhgiqvvw", password="999f624546819f9983ca1f6885672a281c4fe8ea23cbe3af4e42b98254b57cdd", port=5432)
         conn.autocommit = True
         self.cursor = conn.cursor()
         print (self.cursor)
@@ -39,7 +39,7 @@ class DatabaseConnection:
             weight INTEGER NOT NULL,
             total_price INTEGER NOT NULL,
             status VARCHAR(25) DEFAULT 'pending',
-            present_location VARCHAR(25) DEFAULT 'office'
+            present_location VARCHAR(25) NOT NULL
         )"""
         self.cursor.execute(parcels_table)
 
@@ -64,7 +64,8 @@ class DatabaseConnection:
         return [user_name,password]
 
     def add_parcel(self, user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price):
-        insert_parcel = "INSERT INTO parcels (user_name, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price)
+        insert_parcel = "INSERT INTO parcels (user_name, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price, present_location) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price, pickup_location)
+
         self.cursor.execute(insert_parcel)
 
     def get_all_parcels(self):
@@ -82,7 +83,7 @@ class DatabaseConnection:
     def get_parcels_by_user(self, user_name):
         get_user_parcels = "SELECT * FROM parcels WHERE user_name = '{}'".format(user_name)
         self.cursor.execute(get_user_parcels)
-        result = self.cursor.fetchone()
+        result = self.cursor.fetchall()
         return result
 
     def change_location(self, parcel_id, present_location):

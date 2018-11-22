@@ -36,6 +36,8 @@ class Endpoints(Base):
         create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
             data=json.dumps({"user_name":"daniella", "password":"danny"}))
         self.assertEqual(create_user.status_code, 201)
+        response = json.loads(create_user.data.decode())
+        self.assertEqual(response['message'], 'User daniella successfully created')
         
 
     def test_admin_login(self):
@@ -56,6 +58,57 @@ class Endpoints(Base):
         response = json.loads(login_user.data.decode())
         self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
 
+    def test_get_registered_users(self):
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
+            data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
+            data=json.dumps({"user_name":"daniella", "password":"danny"}))
+        self.assertEqual(create_user.status_code, 201)
+
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
+            data=json.dumps({"user_name":"daniella", "password":"danny"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
+
+        get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        self.assertEqual(get_users.status_code, 200)
+
+    def test_no_registered_users(self):
+        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
+            data=json.dumps({"user_name":"admin", "password":"root"}))
+        self.assertEqual(admin_login.status_code, 200)
+        response = json.loads(admin_login.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_access_token = response['access_token']
+
+        get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        self.assertEqual(get_users.status_code, 200)
+        get_response = json.loads(get_users.data.decode())
+        self.assertEqual(get_response['message'], 'There are no registered users')
+
+    def test_unauthorized_user_get_registered_users(self):
+        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
+            data=json.dumps({"user_name":"daniella", "password":"danny"}))
+        self.assertEqual(create_user.status_code, 201)
+
+        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
+            data=json.dumps({"user_name":"daniella", "password":"danny"}))
+        self.assertEqual(login_user.status_code, 200)
+        response = json.loads(login_user.data.decode())
+        self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
+        self.user_access_token = response['access_token']
+
+        get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.user_access_token}"})
+        self.assertEqual(get_users.status_code, 401)
+        get_response = json.loads(get_users.data.decode())
+        self.assertEqual(get_response['message'], 'You do not have access to this')
+
 class Set(Base):
     """
     Tests all aspects of setting attributes
@@ -69,8 +122,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name is required", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual("User name/password required", response['message'])
+        self.assertEqual(post_request.status_code, 400)
 
     def test_user_name_str(self):
         user ={
@@ -79,8 +132,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name must be a string", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual("User name/password must be strings", response['message'])
+        self.assertEqual(post_request.status_code, 400)
 
     def test_user_name_letters(self):
         user ={
@@ -89,8 +142,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name must be letters", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual("User name/password must be letters", response['message'])
+        self.assertEqual(post_request.status_code, 400)
 
     def test_user_name_exists(self):
         create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
@@ -103,7 +156,7 @@ class Set(Base):
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
         self.assertEqual("User daniella already exists", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual(post_request.status_code, 400)
 
     def test_password_required(self):
         user ={
@@ -112,8 +165,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("Password is required", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual("User name/password required", response['message'])
+        self.assertEqual(post_request.status_code, 400)
 
     def test_password_letters_or_numbers(self):
         user ={
@@ -122,8 +175,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("Password should be letters and/or numbers", response['message'])
-        self.assertEqual(post_request.status_code, 200)
+        self.assertEqual("User name/password must be letters", response['message'])
+        self.assertEqual(post_request.status_code, 400)
 
     def test_password_str(self):
         user ={
@@ -132,8 +185,8 @@ class Set(Base):
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("Password must be a string", response['message'])
-        self.assertEqual(post_request.status_code, 200)    
+        self.assertEqual("User name/password must be strings", response['message'])
+        self.assertEqual(post_request.status_code, 400)    
   
 
 if __name__ == ('__main__'):

@@ -2,8 +2,8 @@
 Set of API endpoints to be consumed by a courier service application 
 
 
-[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=feature)](https://travis-ci.org/dxania/Send_IT_APIs)
-[![Coverage Status](https://coveralls.io/repos/github/dxania/Send_IT_APIs/badge.svg?branch=develop)](https://coveralls.io/github/dxania/Send_IT_APIs?branch=develop)
+[![Build Status](https://travis-ci.org/dxania/Send_IT_APIs.svg?branch=ft-send-IT-with-database)](https://travis-ci.org/dxania/Send_IT_APIs)
+[![Coverage Status](https://coveralls.io/repos/github/dxania/Send_IT_APIs/badge.svg?branch=ft-send-IT-with-database)](https://coveralls.io/github/dxania/Send_IT_APIs?branch=ft-send-IT-with-database)
 [![Maintainability](https://api.codeclimate.com/v1/badges/8dc6eba4cf7bb21cf416/maintainability)](https://codeclimate.com/github/dxania/Send_IT_APIs/maintainability)
 
 
