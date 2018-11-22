@@ -3,106 +3,40 @@ import unittest
 from app import app
 from app.routes.user_routes import *
 from app.controllers.db import DatabaseConnection
+from tests.test_create import Base
 
-test_user ={
-    "user_name" : "dayy",
-	"password": "alg"
-}
-
-db = DatabaseConnection()
-
-
-class Base(unittest.TestCase):
-    """Base class for tests. 
-    This class defines a common `setUp` method that defines attributes which are used in the various tests.
-    """
-
-    def setUp(self):
-        self.app_client = app.test_client()
-        db.setUp()
-
-    def tearDown(self):
-        db.delete_tables()
-        
 
 class Endpoints(Base):
     """
     Tests all aspects of endpoints
-    Tests include: creating a parcel delivery order, getting all parcel delivery orders,getting a particular 
-    parcel delivery order, canceling a parcel delivery order, getting all parcel delivery orders by a specific user.  
+    Tests include: registering a user, logging in a user, logging in an admin.  
     """
 
     def test_sign_up(self):
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(create_user.status_code, 201)
-        response = json.loads(create_user.data.decode())
-        self.assertEqual(response['message'], 'User daniella successfully created')
+        self.sign_up()
         
-
     def test_admin_login(self):
-        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
-            data=json.dumps({"user_name":"admin", "password":"root"}))
-        self.assertEqual(admin_login.status_code, 200)
-        response = json.loads(admin_login.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
+        self.admin_login()
 
     def test_user_login(self):
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(create_user.status_code, 201)
-
-        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(login_user.status_code, 200)
-        response = json.loads(login_user.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
+        self.user_login()
 
     def test_get_registered_users(self):
-        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
-            data=json.dumps({"user_name":"admin", "password":"root"}))
-        self.assertEqual(admin_login.status_code, 200)
-        response = json.loads(admin_login.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
-        self.admin_access_token = response['access_token']
-
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(create_user.status_code, 201)
-
-        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(login_user.status_code, 200)
-        response = json.loads(login_user.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
+        self.admin_login()
+        self.user_login()
 
         get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.admin_access_token}"})
         self.assertEqual(get_users.status_code, 200)
 
     def test_no_registered_users(self):
-        admin_login = self.app_client.post("api/v1/auth/login", content_type="application/json", 
-            data=json.dumps({"user_name":"admin", "password":"root"}))
-        self.assertEqual(admin_login.status_code, 200)
-        response = json.loads(admin_login.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as admin')
-        self.admin_access_token = response['access_token']
-
+        self.admin_login()
         get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.admin_access_token}"})
         self.assertEqual(get_users.status_code, 200)
         get_response = json.loads(get_users.data.decode())
         self.assertEqual(get_response['message'], 'There are no registered users')
 
     def test_unauthorized_user_get_registered_users(self):
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(create_user.status_code, 201)
-
-        login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(login_user.status_code, 200)
-        response = json.loads(login_user.data.decode())
-        self.assertEqual(response['message'], 'You have successfully been logged in as daniella')
-        self.user_access_token = response['access_token']
+        self.user_login()
 
         get_users = self.app_client.get('/api/v1/users', headers={'Authorization': f"Bearer {self.user_access_token}"})
         self.assertEqual(get_users.status_code, 401)
