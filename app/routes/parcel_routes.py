@@ -15,7 +15,7 @@ def parcels():
     """Retrieve all parcels"""
     return Parcel_Controller.get_parcels()
 
-@app.route('/api/v1/users/<user_id>/parcels', methods = ['GET'])
+@app.route('/api/v1/users/<int:user_id>/parcels', methods = ['GET'])
 @jwt_required
 def get_parcels_by_user(user_id):
     """Retrieve all parcels by a specific user"""

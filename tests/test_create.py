@@ -6,8 +6,15 @@ from app.routes.user_routes import *
 from app.controllers.db import DatabaseConnection
 
 test_user ={
-    "user_name" : "lynn",
-	"password": "alg"
+    "user_name" : "eve",
+    "email" : "kxania@gmail.com",
+	"password": "algorithm"
+}
+
+test_user2 ={
+    "user_name" : "maria",
+    "email" : "kxania@gmail.com",
+	"password": "algorithm"
 }
 
 test_parcel = {
@@ -43,13 +50,13 @@ class Base(unittest.TestCase):
 
     def sign_up(self):
         create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"eve", "password":"alg"}))
+            data=json.dumps(test_user))
         self.assertEqual(create_user.status_code, 201)
 
     def user_login(self):
         self.sign_up()
         login_user = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
-            data=json.dumps({"user_name":"eve", "password":"alg"}))
+            data=json.dumps({"user_name":"eve", "password":"algorithm"}))
         self.assertEqual(login_user.status_code, 200)
         response = json.loads(login_user.data.decode())
         self.assertEqual(response['message'], 'You have successfully been logged in as eve')
@@ -57,16 +64,16 @@ class Base(unittest.TestCase):
 
     def sign_up_user2(self):
         create_user2 = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+            data=json.dumps(test_user2))
         self.assertEqual(create_user2.status_code, 201)
 
     def user2_login(self):
         self.sign_up_user2()
         login_user2 = self.app_client.post('/api/v1/auth/login', content_type='application/json', 
-            data=json.dumps({"user_name":"harriet", "password":"sleeve"}))
+            data=json.dumps({"user_name":"maria", "password":"algorithm"}))
         self.assertEqual(login_user2.status_code, 200)
         response2 = json.loads(login_user2.data.decode())
-        self.assertEqual(response2['message'], 'You have successfully been logged in as harriet')
+        self.assertEqual(response2['message'], 'You have successfully been logged in as maria')
         self.user_access_token2 = response2['access_token']
 
 class Endpoints(Base):
@@ -74,14 +81,6 @@ class Endpoints(Base):
     Tests all aspects of the create parcel endpoint
     Tests include: creating a parcel delivery order.  
     """
-    def test_admin_create_parcel(self):
-        self.admin_login()
-        post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
-            data=json.dumps(test_parcel), headers={'Authorization': f"Bearer {self.admin_access_token}"})
-        self.assertEqual(post_request.status_code, 400)
-        post_response = json.loads(post_request.data.decode())
-        self.assertEqual(post_response["message"], "You cannot create parcel delivery orders")
-
     def test_create_parcel(self):
         self.user_login()
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', data=json.dumps(test_parcel), headers={'Authorization':f"Bearer {self.user_access_token}"})

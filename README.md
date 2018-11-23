@@ -74,10 +74,16 @@ After cloning, you will have a folder named `Send_IT_APIs`
 3. Activate the virtual environment
 ``` source <name of virtualenvironment>/bin/activate```
 You should see the name of the virtual environment placed right before your current path/directory in brackets()
-4. Run the application
+4. Connect to the postgres db
+Once Postgres is installed and you can connect, you’ll need to export the DATABASE_URL environment variable for to connect to it when running locally
+Run the command below to connect
+```
+DATABASE_URL=$(heroku config:get DATABASE_URL -a send-it-api-app)
+```
+5. Run the application
 ```export FLASK_APP=app.py``` then
 ```flask run```
-5. Follow the instructions
+
 
 ## Testing
 1. Run `pytest` or `pytest tests/<test_file_name>` in the directory of the project to run unit tests
@@ -92,6 +98,7 @@ Input
 ```
     {
         "user_name":"Dee",
+        "email": "kxania@gmail.com",
         "password":"warmups"
     }
 ```
@@ -169,7 +176,7 @@ Input
 ```
 Output
 ```
-    {"message":f"Destination of parcel 1 changed to Nairobi"}
+    {"message":"Destination of parcel 1 changed to Nairobi"}
 ```
 
 ## Deployment

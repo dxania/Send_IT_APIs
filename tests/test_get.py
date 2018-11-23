@@ -42,7 +42,7 @@ class Endpoints(Base):
         self.user_login()
         post_request = self.app_client.post("/api/v1/parcels",content_type='application/json',data=json.dumps(test_parcel), 
             headers={'Authorization': f"Bearer {self.user_access_token}"})
-        get_request = self.app_client.get("/api/v1/users/mike/parcels", headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        get_request = self.app_client.get("/api/v1/users/1/parcels", headers={'Authorization': f"Bearer {self.admin_access_token}"})
         self.assertEqual(get_request.status_code, 200)
 
     def test_get_parcel(self):
@@ -53,32 +53,22 @@ class Endpoints(Base):
         get_request = self.app_client.get("/api/v1/parcels/1", headers={'Authorization': f"Bearer {self.admin_access_token}"})
         self.assertEqual(get_request.status_code, 200)
 
-    def test_get_all_parcel_delivery_orders_using_invalid_username(self):
-        self.admin_login()
-        self.user_login()
-        post_request = self.app_client.post("/api/v1/parcels",content_type='application/json',data=json.dumps(test_parcel), 
-            headers={'Authorization': f"Bearer {self.user_access_token}"})
-        get_request = self.app_client.get("/api/v1/users/1/parcels", 
-            headers={'Authorization': f"Bearer {self.admin_access_token}"})
-        response = json.loads(get_request.data)
-        self.assertEqual(response['message'], 'Enter a valid user name')
-        self.assertEqual(get_request.status_code, 400)
 
-    # def test_get_empty_parcel_delivery_order_list_by_user(self):
-    #     self.admin_login()
-    #     get_request = self.app_client.get("/api/v1/users/sam/parcels", headers={'Authorization': f"Bearer {self.admin_access_token}"})
-    #     response = json.loads(get_request.data)
-    #     self.assertEqual(response['message'], 'There are no parcels delivery orders created by sam')
-    #     self.assertEqual(get_request.status_code, 200)
+    def test_get_empty_parcel_delivery_order_list_by_user(self):
+        self.admin_login()
+        get_request = self.app_client.get("/api/v1/users/1/parcels", headers={'Authorization': f"Bearer {self.admin_access_token}"})
+        response = json.loads(get_request.data)
+        self.assertEqual(response['message'], 'There are no parcels delivery orders created by user 1')
+        self.assertEqual(get_request.status_code, 200)
 
     def test_invalid_access_to_users_parcels(self):
         self.user_login()
         post_request = self.app_client.post("/api/v1/parcels",content_type='application/json', data=json.dumps(test_parcel), 
             headers={'Authorization': f"Bearer {self.user_access_token}"})
         self.user2_login()
-        get_request = self.app_client.get("/api/v1/users/eve/parcels", headers={'Authorization': f"Bearer {self.user_access_token2}"})
+        get_request = self.app_client.get("/api/v1/users/1/parcels", headers={'Authorization': f"Bearer {self.user_access_token2}"})
         response = json.loads(get_request.data)
-        self.assertEqual(response['message'], "You do not have access to view eve's parcels")
+        self.assertEqual(response['message'], "You can only view parcels you created")
         self.assertEqual(get_request.status_code, 401)
 
     def test_invalid_access_to_all_parcels(self):
@@ -98,7 +88,7 @@ class Endpoints(Base):
             headers={'Authorization': f"Bearer {self.user_access_token}"})
         get_request = self.app_client.get("/api/v1/parcels/1", headers={'Authorization': f"Bearer {self.user_access_token2}"})
         response = json.loads(get_request.data)
-        self.assertEqual(response['message'], "You do not have access to parcel delivery order 1")
+        self.assertEqual(response['message'], "You can only view parcels you created")
         self.assertEqual(get_request.status_code, 401)
 
     def test_get_non_existent_parcel(self):

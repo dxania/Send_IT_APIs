@@ -23,7 +23,7 @@ class Parcel_Controller:
         """Retrieve all parcels"""     
         parcel_list = []
         current_user = get_jwt_identity()
-        if current_user == 'admin':
+        if current_user.get('role') == True:
             parcels = db.get_all_parcels()
             if len(parcels) >= 1:
                 for parcel in parcels:
@@ -33,35 +33,35 @@ class Parcel_Controller:
             return jsonify({'message':'There are no parcel delivery orders'}), 200
         return jsonify({'message':'You can only view parcels you created'}), 401
 
-    def get_parcels_by_user(user_name):
+    def get_parcels_by_user(user_id):
         """Retrieve all parcels by a specific user"""
         parcel_list = []
         current_user = get_jwt_identity()
-        parcels = db.get_all_parcels()
-        char_set = re.compile('[A-Za-z]')
-        if not char_set.match(user_name):
-            return jsonify({'message':'Enter a valid user name'}), 400
-        for parcel in parcels:
-            if current_user == 'admin' or current_user == parcel[1]: 
-                parcels_by_user = db.get_parcels_by_user(user_name)
-                if len(parcels_by_user) > 0:
-                    for parcel in parcels_by_user:
-                        parcel_dict = Parcel.to_dict(parcel)
-                        parcel_list.append(parcel_dict)
-                    return jsonify({"parcel(s)":parcel_list}), 200
-                return jsonify({'message':f"There are no parcels delivery orders created by {user_name}"}), 200
-            return jsonify({'message':f"You do not have access to view {user_name}'s parcels"}), 401
+        print(isinstance(current_user.get('id'), int))
+        print(isinstance(user_id, int))
+        if current_user.get('id') == user_id or current_user.get('role') == True:
+            print(user_id)
+            print(current_user.get('id'))
+            parcels = db.get_parcels_by_user(user_id)
+            if len(parcels) >= 1:
+                for parcel in parcels:
+                    parcel_dict = Parcel.to_dict(parcel)
+                    parcel_list.append(parcel_dict)
+                return jsonify({"parcels": parcel_list}), 200
+            return jsonify({'message':f"There are no parcels delivery orders created by user {user_id}"}), 200
+        return jsonify({'message':'You can only view parcels you created'}), 401
 
     def get_parcel(parcel_id):
         """Retrieve a particular parcel"""
         current_user = get_jwt_identity()
-        parcel = db.get_a_parcel(parcel_id)
-        if current_user == 'admin' or current_user == parcel[1]:
-            if parcel:
+        parcel = db.get_a_parcel(parcel_id)  
+        if parcel:
+            if current_user.get('role') == True or current_user.get('id') == parcel[1]:
                 parcel_dict = Parcel.to_dict(parcel)
                 return jsonify({"parcel":parcel_dict}), 200
-            return jsonify({'message': f"There is no parcel with ID {parcel_id}"}), 404
-        return jsonify({'message': f"You do not have access to parcel delivery order {parcel_id}"}), 401
+            return jsonify({'message': f"You can only view parcels you created"}), 401
+        return jsonify({'message': f"There is no parcel with ID {parcel_id}"}), 404
+        
 
     def change_present_location(parcel_id):
         """Change the present location of a parcel delivery order"""
@@ -69,7 +69,7 @@ class Parcel_Controller:
         user_input = request.get_json(force=True) 
         parcel = db.get_a_parcel(parcel_id)
         if parcel:
-            if current_user == 'admin':
+            if current_user.get('role') == True:
                 present_location = user_input.get('present_location')
                 validated_location = Validator.validate_str_to_change(present_location)
                 if validated_location:
@@ -86,7 +86,7 @@ class Parcel_Controller:
         user_input = request.get_json(force=True) 
         parcel = db.get_a_parcel(parcel_id)
         if parcel:
-            if current_user == parcel[1]:
+            if current_user.get('id') == parcel[1]:
                 destination = user_input.get('destination')
                 validated_destination = Validator.validate_str_to_change(destination)
                 if validated_destination:
@@ -99,18 +99,18 @@ class Parcel_Controller:
 
     def change_parcel_status(parcel_id):
         """Change the status of a parcel delivery order"""
-        statuses = ['pending','in-transit','cancelled', 'delivered']
         current_user = get_jwt_identity()
         user_input = request.get_json(force=True) 
         parcel = db.get_a_parcel(parcel_id)
         status = user_input.get('status')
-        validated_status = Validator.validate_str_to_change(status)
-        if validated_status:
-            return validated_status
-        if status not in statuses:
-            return jsonify({"message":f"Status can only be {statuses}"}), 400   
+        validated_status_input = Validator.validate_str_to_change(status)
+        if validated_status_input:
+            return validated_status_input
         if parcel:
-            if parcel[0] == parcel_id and current_user == 'admin': 
+            validated_status_against_parcel = Validator.validate_status(parcel, status)
+            if validated_status_against_parcel:
+                return validated_status_against_parcel
+            if parcel[0] == parcel_id and current_user.get('role') == True: 
                 status_change = db.change_status(parcel_id, status)
                 return jsonify({"message":f"Status of parcel {parcel_id} changed to {status}"}), 200  
             return jsonify({'message':f"Invalid request! You do not have rights to change the status of a parcel"}), 401 
@@ -122,7 +122,8 @@ class Parcel_Controller:
         user_input = request.get_json(force=True)
 
         current_user = get_jwt_identity()
-        user_id = current_user
+        user_id = current_user.get('id')
+        user_name = current_user.get('username')
         recipient_name = user_input.get("recipient_name")
         recipient_mobile = user_input.get("recipient_mobile")
         pickup_location = user_input.get("pickup_location")
@@ -143,9 +144,5 @@ class Parcel_Controller:
         if len(msgs_list) > 0:
             return jsonify(validate_parcel), 400
         parcel = Parcel(user_id, parcel_dict)
-        
-        if current_user == 'admin':
-            return jsonify({'message':'You cannot create parcel delivery orders'}), 400
-        else:
-            db.add_parcel(parcel.user_id, parcel.recipient_name, parcel.recipient_mobile, pickup_location, parcel.destination, parcel.weight, parcel.total_price)
-            return jsonify({"message":"Parcel successfully created"}), 201
+        db.add_parcel(parcel.user_id, user_name, parcel.recipient_name, parcel.recipient_mobile, pickup_location, parcel.destination, parcel.weight, parcel.total_price)
+        return jsonify({"message":"Parcel successfully created"}), 201

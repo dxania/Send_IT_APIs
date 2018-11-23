@@ -28,14 +28,14 @@ class Parcel():
     def to_dict(parcel):
         parcel_dict = {
             "parcel_id": parcel[0],
-            "created_by": parcel[1],
-            "recipient_name": parcel[2],
-            "recipient_mobile": parcel[3],
-            "pickup_location" : parcel[4],
-            "destination": parcel[5],
-            "weight": parcel[6],
-            "total_price":parcel[7],
-            "status": parcel[8],
-            "present_location": parcel[9]
+            "created_by": parcel[2],
+            "recipient_name": parcel[3],
+            "recipient_mobile": parcel[4],
+            "pickup_location" : parcel[5],
+            "destination": parcel[6],
+            "weight": parcel[7],
+            "total_price":parcel[8],
+            "status": parcel[9],
+            "present_location": parcel[10]
         }
         return parcel_dict
