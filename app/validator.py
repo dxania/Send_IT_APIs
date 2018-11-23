@@ -1,6 +1,5 @@
 import re
 from flask import jsonify
-from validate_email import validate_email
 
 class Validator: 
     def validate_str_to_change(arg):

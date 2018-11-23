@@ -176,7 +176,7 @@ Input
 ```
 Output
 ```
-    {"message":f"Destination of parcel 1 changed to Nairobi"}
+    {"message":"Destination of parcel 1 changed to Nairobi"}
 ```
 
 ## Deployment
