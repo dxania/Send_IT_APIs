@@ -17,3 +17,8 @@ def user_signup():
 @jwt_required
 def get_registered_users():
     return User_Controller.get_registered_users()
+
+@app.route('/api/v1/users/<int:user_id>/role', methods = ['PUT'])
+@jwt_required
+def change_user_role(user_id):
+    return User_Controller.switch_user_role(user_id)

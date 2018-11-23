@@ -74,11 +74,11 @@ class Set(Base):
         self.admin_login()
         post_request = self.app_client.post("/api/v1/parcels", content_type='application/json', 
             headers={'Authorization': f"Bearer {self.user_access_token}"}, data=json.dumps(test_parcel))
-        put_request = self.app_client.put("/api/v1/parcels/100/status", data=json.dumps({"status":"okay"}), 
+        put_request = self.app_client.put("/api/v1/parcels/1/status", data=json.dumps({"status":"okay"}), 
             headers={'Authorization': f"Bearer {self.admin_access_token}"})
         response = json.loads(put_request.data.decode())
         self.assertEqual(put_request.status_code, 400)
-        self.assertEqual(response['message'], "Status can only be ['pending', 'in-transit', 'cancelled', 'delivered']")
+        self.assertEqual(response['message'], "Status can only be ['pending', 'intransit', 'cancelled', 'delivered']")
 
     def test_change_status_empty_value(self):       
         self.user_login()

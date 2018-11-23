@@ -52,17 +52,19 @@ class Set(Base):
     def test_user_name_required(self):
         user ={
             "user_name" : "",
-            "password": "winx"
+            "email":"kxania@gmail.com",
+            "password": "thepasswords"
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name/password required", response['message'])
+        self.assertEqual("User name/password/email required", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
     def test_user_name_str(self):
         user ={
             "user_name" : 55,
-            "password": "winx"
+            "email":"kxania@gmail.com",
+            "password": "thepasswords"
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
@@ -72,55 +74,81 @@ class Set(Base):
     def test_user_name_letters(self):
         user ={
             "user_name" : "55",
-            "password": "winx"
+            "email":"kxania@gmail.com",
+            "password": "thepasswords"
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name/password must be letters", response['message'])
+        self.assertEqual("User name must be letters", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
     def test_user_name_exists(self):
-        create_user = self.app_client.post("/api/v1/auth/signup", content_type='application/json', 
-            data=json.dumps({"user_name":"daniella", "password":"danny"}))
-        self.assertEqual(create_user.status_code, 201)
+        self.sign_up()
         user ={
-            "user_name" : "daniella",
-            "password": "danny"
+            "user_name" : "eve",
+            "email":"kxania@gmail.com",
+            "password": "danniellas"
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User daniella already exists", response['message'])
+        self.assertEqual("User eve already exists", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
     def test_password_required(self):
         user ={
             "user_name" : "wake",
+            "email":"kxania@gmail.com",
             "password": ""
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name/password required", response['message'])
+        self.assertEqual("User name/password/email required", response['message'])
         self.assertEqual(post_request.status_code, 400)
 
-    def test_password_letters_or_numbers(self):
+    def test_password_length(self):
         user ={
-            "user_name" : "dan",
-            "password": "#123"
+            "user_name" : "wake",
+            "email":"kxania@gmail.com",
+            "password": "123"
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
-        self.assertEqual("User name/password must be letters", response['message'])
+        self.assertEqual("Password must be more than 8 characters long", response['message'])
         self.assertEqual(post_request.status_code, 400)
+
 
     def test_password_str(self):
         user ={
             "user_name" : "dan",
-            "password": 123
+            "email":"kxania@gmail.com",
+            "password": 123456789
         }
         post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
         response = json.loads(post_request.data.decode())
         self.assertEqual("User name/password must be strings", response['message'])
         self.assertEqual(post_request.status_code, 400)    
+
+    def test_email_required(self):
+        user ={
+            "user_name" : "wake",
+            "email":"",
+            "password": ""
+        }
+        post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
+        response = json.loads(post_request.data.decode())
+        self.assertEqual("User name/password/email required", response['message'])
+        self.assertEqual(post_request.status_code, 400)
+
+    def test_email_valid(self):
+        user ={
+            "user_name" : "wake",
+            "email":"cakes",
+            "password": "8characters"
+        }
+        post_request = self.app_client.post("/api/v1/auth/signup", content_type='application/json', data=json.dumps(user))
+        response = json.loads(post_request.data.decode())
+        self.assertEqual("Please enter a valid email", response['message'])
+        self.assertEqual(post_request.status_code, 400)
   
 
 if __name__ == ('__main__'):
