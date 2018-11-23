@@ -45,7 +45,7 @@ class DatabaseConnection:
         )"""
         self.cursor.execute(parcels_table)
 
-        password = DatabaseConnection.generate_hash("root")
+        password = DatabaseConnection.generate_hash("rootsroot")
         check_no_of_rows = "SELECT * FROM users"
         self.cursor.execute(check_no_of_rows)
         result = self.cursor.fetchall()
