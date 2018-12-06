@@ -18,6 +18,36 @@ def user_signup():
 def get_registered_users():
     return User_Controller.get_registered_users()
 
+@app.route('/api/v1/users/<user_name>', methods = ['GET'])
+@jwt_required
+def get_user(user_name):
+    return User_Controller.get_user(user_name)
+
+@app.route('/api/v1/users/<user_name>/parcels', methods = ['GET'])
+@jwt_required
+def number_of_parcels(user_name):
+    return User_Controller.no_user_parcels(user_name)
+
+@app.route('/api/v1/users/<user_name>/parcels/cancelled', methods = ['GET'])
+@jwt_required
+def number_of_cancelled_parcels(user_name):
+    return User_Controller.no_cancelled_user_parcels(user_name)
+
+@app.route('/api/v1/users/<user_name>/parcels/pending', methods = ['GET'])
+@jwt_required
+def number_of_pending_parcels(user_name):
+    return User_Controller.no_pending_user_parcels(user_name)
+
+@app.route('/api/v1/users/<user_name>/parcels/intransit', methods = ['GET'])
+@jwt_required
+def number_of_intransit_parcels(user_name):
+    return User_Controller.no_intransit_user_parcels(user_name)
+
+@app.route('/api/v1/users/<user_name>/parcels/delivered', methods = ['GET'])
+@jwt_required
+def number_of_delivered_parcels(user_name):
+    return User_Controller.no_delivered_user_parcels(user_name)
+
 @app.route('/api/v1/users/<int:user_id>/role', methods = ['PUT'])
 @jwt_required
 def change_user_role(user_id):

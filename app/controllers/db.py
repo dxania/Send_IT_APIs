@@ -23,9 +23,9 @@ class DatabaseConnection:
         users_table = """CREATE TABLE IF NOT EXISTS users(
             user_id SERIAL PRIMARY KEY,
             user_name VARCHAR(25) UNIQUE NOT NULL,
-            email VARCHAR(25) NOT NULL,
-            password VARCHAR(225) NOT NULL,
-            admin BOOLEAN DEFAULT False
+            user_email VARCHAR(25) UNIQUE NOT NULL,
+            user_password VARCHAR(225) NOT NULL,
+            admin_status BOOLEAN DEFAULT False
         )"""
         self.cursor.execute(users_table)
 
@@ -50,26 +50,26 @@ class DatabaseConnection:
         self.cursor.execute(check_no_of_rows)
         result = self.cursor.fetchall()
         if len(result)==0:
-            insert_admin = "INSERT INTO users (user_name, email, password) values ('admin', 'admin@gmail.com', '{}')".format(password)
-            update_to_admin = "UPDATE users set admin = True where user_name = 'admin'"
+            insert_admin = "INSERT INTO users (user_name, user_email, user_password) values ('admin', 'admin@gmail.com', '{}')".format(password)
+            update_to_admin = "UPDATE users set admin_status = True where user_name = 'admin'"
             self.cursor.execute(insert_admin)
             self.cursor.execute(update_to_admin)
           
-    def insert_user(self, user_name, email, password):
-        insert_user = "INSERT INTO users (user_name, email, password) values ('{}', '{}', '{}')".format(user_name, email, password)
+    def insert_user(self, user_name, user_email, user_password):
+        insert_user = "INSERT INTO users (user_name, user_email, user_password) values ('{}', '{}', '{}')".format(user_name, user_email, user_password)
         self.cursor.execute(insert_user)
 
-    def login_user(self, user_name, password):
-        select_user = "SELECT user_name, password FROM users WHERE user_name = '{}' and password = '{}'".format(user_name, password)
+    def login_user(self, user_name, user_password):
+        select_user = "SELECT user_name, user_password FROM users WHERE user_name = '{}' and user_password = '{}'".format(user_name, user_password)
         self.cursor.execute(select_user)
-        return [user_name,password]
+        return [user_name,user_password]
 
     def add_parcel(self, user_id, user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price):
         insert_parcel = "INSERT INTO parcels (user_id, user_name, recipient_name, recipient_mobile, pickup_location, destination,  weight, total_price, present_location) values ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(user_id, user_name, recipient_name, recipient_mobile, pickup_location, destination, weight, total_price, pickup_location)
         self.cursor.execute(insert_parcel)
 
     def get_all_parcels(self):
-        get_parcels = "SELECT * FROM parcels"
+        get_parcels = "SELECT * FROM parcels ORDER BY parcel_id ASC"
         self.cursor.execute(get_parcels)
         result = self.cursor.fetchall()
         return result
@@ -81,7 +81,7 @@ class DatabaseConnection:
         return result
 
     def get_parcels_by_user(self, user_id):
-        get_user_parcels = "SELECT * FROM parcels WHERE user_id = '{}'".format(user_id)
+        get_user_parcels = "SELECT * FROM parcels WHERE user_id = '{}' ORDER BY parcel_id ASC".format(user_id)
         self.cursor.execute(get_user_parcels)
         result = self.cursor.fetchall()
         return result
@@ -101,23 +101,23 @@ class DatabaseConnection:
         self.cursor.execute(status)
 
     def get_user(self, user_name):
-        get_user_parcels = "SELECT * FROM users WHERE user_name = '{}'".format(user_name)
-        self.cursor.execute(get_user_parcels)
+        get_user = "SELECT * FROM users WHERE user_name = '{}'".format(user_name)
+        self.cursor.execute(get_user)
         result = self.cursor.fetchone()
         return result
 
     def get_users(self):
-        get_users = "SELECT * FROM users"
+        get_users = "SELECT * FROM users ORDER BY user_id ASC"
         self.cursor.execute(get_users)
         result = self.cursor.fetchall()
         return result
 
     def change_user_role_to_admin(self, user_id):
-        update_role_to_admin = "UPDATE users set admin = True where user_id = '{}'".format(user_id)
+        update_role_to_admin = "UPDATE users set admin_status = True where user_id = '{}'".format(user_id)
         self.cursor.execute(update_role_to_admin)
 
     def change_user_role_to_user(self, user_id):
-        update_role_to_regular_user = "UPDATE users set admin = False where user_id = '{}'".format(user_id)
+        update_role_to_regular_user = "UPDATE users set admin_status = False where user_id = '{}'".format(user_id)
         self.cursor.execute(update_role_to_regular_user)
 
     def delete_tables(self):
@@ -125,3 +125,38 @@ class DatabaseConnection:
         self.cursor.execute(delete)
 
     
+    def select_no_of_user_parcels(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
+    def select_no_of_user_parcels_cancelled(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}' and status = 'cancelled'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
+    def select_no_of_user_parcels_cancelled(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}' and status = 'cancelled'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
+    def select_no_of_user_parcels_pending(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}' and status = 'pending'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
+    def select_no_of_user_parcels_intransit(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}' and status = 'intransit'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
+    def select_no_of_user_parcels_delivered(self, username):
+        query = "SELECT COUNT(user_name) FROM parcels WHERE user_name = '{}' and status = 'delivered'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result

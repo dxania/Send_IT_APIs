@@ -27,7 +27,7 @@ class Validator:
 
     def validate_parcel(parcel):
         messages = []
-        error_dict = {'message(s)':messages}
+        error_dict = {'message':messages}
 
         variables = ['recipient_name', 'pickup_location', 'destination', 'recipient_mobile', 'weight']
         for variable in variables:
@@ -53,34 +53,33 @@ class Validator:
 
         return error_dict
 
-    def validate_user_login_credentials(*args):
-        for arg in args:
-            if not arg:
-                return jsonify({'message':"User name/password required"}), 400
-            else:
-                if not isinstance(arg, str):
-                    return jsonify({'message':"User name/password must be strings"}), 400
-                else:    
-                    charset = re.compile('[A-Za-z]')
-                    checkmatch = charset.match(arg)
-                    if not checkmatch:
-                        return jsonify({'message':'User name/password must be letters'}), 400
-
-    def validate_user_credentials(user_name, email, password):
-        if not user_name or not email or not password:
-            return jsonify({'message':"User name/password/email required"}), 400
+    def validate_user_login_credentials(user_name, user_password):
+        if not user_name:
+            return jsonify({'message':"User name required"}), 400
+        if not user_password:
+            return jsonify({'message':"Password required"}), 400
         else:
-            if not isinstance(user_name, str) or not isinstance(password, str) or not isinstance(email, str):
-                return jsonify({'message':"User name/password must be strings"}), 400
-            else:    
-                charset = re.compile('[A-Za-z]')
-                checkmatch_username = charset.match(user_name)
-                if not checkmatch_username:
-                    return jsonify({'message':'User name must be letters'}), 400 
-                # mail = ['@', '.']   
-                # for m in mail:               
-                #     if not m in email:
-                #         return jsonify({'message':'Please enter a valid email'})
+            uname = str(user_name)
+            charset = re.compile('[A-Za-z]')
+            checkmatch_username = charset.match(uname)
+            if not checkmatch_username:
+                return jsonify({'message':'User name must be letters'}), 400
+               
+
+    def validate_user_credentials(user_name, user_email, user_password):
+        if not user_name:
+            return jsonify({'message':"User name required"}), 400
+        if not user_email:
+            return jsonify({'message':"Email required"}), 400
+        if not user_password:
+            return jsonify({'message':"Password required"}), 400
+        else:  
+            uname = str(user_name)
+            charset = re.compile('[A-Za-z]')
+            checkmatch_username = charset.match(uname)
+            if not checkmatch_username:
+                return jsonify({'message':'User name must be letters'}), 400 
+         
         
 
  
