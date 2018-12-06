@@ -140,9 +140,9 @@ class Parcel_Controller:
             "total_price": total_price
         }
         validate_parcel = Validator.validate_parcel(parcel_dict)
-        msgs_list = validate_parcel['message(s)']
+        msgs_list = validate_parcel['message']
         if len(msgs_list) > 0:
             return jsonify(validate_parcel), 400
         parcel = Parcel(user_id, parcel_dict)
-        db.add_parcel(parcel.user_id, user_name, parcel.recipient_name, parcel.recipient_mobile, pickup_location, parcel.destination, parcel.weight, parcel.total_price)
+        new_parcel = db.add_parcel(parcel.user_id, user_name, parcel.recipient_name, parcel.recipient_mobile, pickup_location, parcel.destination, parcel.weight, parcel.total_price)
         return jsonify({"message":"Parcel successfully created"}), 201

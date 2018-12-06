@@ -1,7 +1,3 @@
-import json
-from flask import jsonify
-from app.models.users_model import users
-
 class Parcel():
     """Parcels class defining the parcel model"""
     def __init__(self, user_id, parcel):    
@@ -15,6 +11,7 @@ class Parcel():
 
     @staticmethod
     def get_delivery_price(weight):
+        """Get total delivery price based on weight of a parcel"""
         if isinstance(weight, int):
             if weight<500:
                 delivery_price = 10000
@@ -26,6 +23,7 @@ class Parcel():
 
     @staticmethod
     def to_dict(parcel):
+        """Convert the parcel object to a dictionary"""
         parcel_dict = {
             "parcel_id": parcel[0],
             "created_by": parcel[2],

@@ -1,22 +1,21 @@
-import json
-from flask import jsonify
-
-users = []
+# import json
+# from flask import jsonify
 
 class User():
     """Users class defining the user model"""
-    def __init__(self, user_name, email, password):
+    def __init__(self, user_name, user_email, user_password):
         self.user_name = user_name
-        self.email = email
-        self.password = password
-        self.admin = False
+        self.user_email = user_email
+        self.user_password = user_password
+        self.admin_status = False
 
         
     def to_dict(self):
+        """Convert the user object to a dictionary"""
         user = {
             "user_name" : self.user_name,
-            "password": self.password,
-            "admin": self.admin
+            "user_password": self.user_password,
+            "admin_status": self.admin_status
         }
         return user
 
