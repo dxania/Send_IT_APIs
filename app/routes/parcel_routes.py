@@ -21,6 +21,30 @@ def get_parcels_by_user(user_id):
     """Retrieve all parcels by a specific user"""
     return Parcel_Controller.get_parcels_by_user(user_id)
 
+@app.route('/api/v1/users/<int:user_id>/parcels/delivered', methods = ['GET'])
+@jwt_required
+def get_delivered_parcels_by_user(user_id):
+    """Retrieve all delivered parcels by a specific user"""
+    return Parcel_Controller.get_delivered_parcels_by_user(user_id)
+
+@app.route('/api/v1/users/<int:user_id>/parcels/intransit', methods = ['GET'])
+@jwt_required
+def get_intransit_parcels_by_user(user_id):
+    """Retrieve all intransit parcels by a specific user"""
+    return Parcel_Controller.get_intransit_parcels_by_user(user_id)
+
+@app.route('/api/v1/users/<int:user_id>/parcels/pending', methods = ['GET'])
+@jwt_required
+def get_pending_parcels_by_user(user_id):
+    """Retrieve all pending parcels by a specific user"""
+    return Parcel_Controller.get_pending_parcels_by_user(user_id)
+
+@app.route('/api/v1/users/<int:user_id>/parcels/cancelled', methods = ['GET'])
+@jwt_required
+def get_cancelled_parcels_by_user(user_id):
+    """Retrieve all cancelled parcels by a specific user"""
+    return Parcel_Controller.get_cancelled_parcels_by_user(user_id)
+
 @app.route('/api/v1/parcels/<int:parcel_id>', methods = ['GET'])
 @jwt_required
 def get_parcel(parcel_id):
