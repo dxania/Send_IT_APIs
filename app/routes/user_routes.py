@@ -23,6 +23,11 @@ def get_registered_users():
 def get_user(user_name):
     return User_Controller.get_user(user_name)
 
+@app.route('/api/v1/users/<user_name>/edit', methods = ['PUT'])
+@jwt_required
+def modify_user(user_name):
+    return User_Controller.edit_user(user_name)
+
 @app.route('/api/v1/users/<user_name>/parcels', methods = ['GET'])
 @jwt_required
 def number_of_parcels(user_name):

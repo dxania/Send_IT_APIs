@@ -7,10 +7,11 @@ from app.controllers.db import DatabaseConnection
 from tests.test_create import Base
 
 test_parcel = {
+    "description" : "Electronics",
     "recipient_name" : "cara",
-    "recipient_mobile": 1234567890,
-    "pickup_location" : "op",
-    "destination": "ki",
+    "recipient_mobile": "0777777999",
+    "pickup_location" : "Nakawa, Uganda",
+    "destination": "Kampala, Uganda",
     "weight":200
     }
 
@@ -53,9 +54,9 @@ class Endpoints(Base):
         get_request = self.app_client.get("/api/v1/parcels/1", headers={'Authorization': f"Bearer {self.admin_access_token}"})
         self.assertEqual(get_request.status_code, 200)
 
-
     def test_get_empty_parcel_delivery_order_list_by_user(self):
         self.admin_login()
+        self.user_login()
         get_request = self.app_client.get("/api/v1/users/1/parcels", headers={'Authorization': f"Bearer {self.admin_access_token}"})
         response = json.loads(get_request.data)
         self.assertEqual(response['message'], 'There are no parcels delivery orders created by user 1')
@@ -80,7 +81,6 @@ class Endpoints(Base):
         self.assertEqual(response['message'], "You can only view parcels you created")
         self.assertEqual(get_request.status_code, 401)
         
-
     def test_unauthorized_user_get_parcel(self):
         self.user_login()
         self.user2_login() 

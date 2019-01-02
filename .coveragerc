@@ -12,6 +12,7 @@ omit =
     */__pycache/*
     */.pytest_cache/*
     app/models/*
+    app/controllers/db.py
 
 exclude_lines =
     pragma: no cover
